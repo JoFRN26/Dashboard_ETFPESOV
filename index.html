@@ -1,0 +1,2056 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>ETFPESOV — Bond Composition & Benchmark</title>
+
+<!-- Excel -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<!-- Plotly -->
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+
+<style>
+
+:root {
+    --background: #f4f6f8;
+    --card: #ffffff;
+    --text: #17202a;
+    --muted: #6b7280;
+    --border: #e5e7eb;
+    --primary: #1f4e79;
+    --green: #16845b;
+    --red: #c0392b;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: var(--background);
+    color: var(--text);
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.container {
+    max-width: 1500px;
+    margin: auto;
+    padding: 28px;
+}
+
+/* =========================
+   HEADER
+========================= */
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 18px;
+}
+
+.title {
+    font-size: 28px;
+    font-weight: 700;
+    margin: 0;
+}
+
+.subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+.upload-label {
+    background: var(--primary);
+    color: white;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.upload-label:hover {
+    opacity: 0.9;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+/* =========================
+   STATUS
+========================= */
+
+.status {
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 15px;
+}
+
+/* =========================
+   DATE SELECTOR
+========================= */
+
+.date-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.date-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    letter-spacing: 0.7px;
+}
+
+select {
+    border: 1px solid var(--border);
+    background: white;
+    border-radius: 8px;
+    padding: 9px 13px;
+    font-size: 13px;
+}
+
+/* =========================
+   KPI CARDS
+========================= */
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.035);
+}
+
+.card-label {
+    color: var(--muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+}
+
+.card-value {
+    font-size: 24px;
+    font-weight: 700;
+    margin-top: 8px;
+}
+
+/* =========================
+   PANELS
+========================= */
+
+.panel {
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.035);
+}
+
+.panel-title {
+    font-size: 14px;
+    font-weight: 700;
+    margin: 3px 4px 12px;
+}
+
+/* =========================
+   CHARTS
+========================= */
+
+.main-chart {
+    height: 470px;
+}
+
+.small-chart {
+    height: 400px;
+}
+
+.two-columns {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.chart-note {
+    color: var(--muted);
+    font-size: 11px;
+    margin: 7px 4px 0;
+}
+
+/* =========================
+   TABLE
+========================= */
+
+.table-container {
+    overflow: auto;
+    max-height: 520px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+th {
+    position: sticky;
+    top: 0;
+    background: #f8fafc;
+    color: #4b5563;
+    text-align: center;
+    padding: 10px;
+    border-bottom: 1px solid var(--border);
+}
+
+td {
+    padding: 9px 10px;
+    border-bottom: 1px solid #eef0f2;
+    text-align: center;
+}
+
+tr:hover td {
+    background: #fafafa;
+}
+
+.numeric {
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.positive {
+    color: var(--green);
+    font-weight: 600;
+}
+
+.negative {
+    color: var(--red);
+    font-weight: 600;
+}
+
+/* =========================
+   EMPTY SCREEN
+========================= */
+
+.empty {
+    text-align: center;
+    padding: 70px;
+    color: var(--muted);
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 900px) {
+
+    .cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .two-columns {
+        grid-template-columns: 1fr;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+}
+
+@media (max-width: 520px) {
+
+    .container {
+        padding: 14px;
+    }
+
+    .cards {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .card-value {
+        font-size: 19px;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+
+    <div class="header">
+
+        <div>
+            <h1 class="title">ETFPESOV</h1>
+
+            <div class="subtitle">
+                Bond Composition & Benchmark
+            </div>
+        </div>
+
+        <div>
+            <label class="upload-label" for="excelFile">
+                Cargar Excel
+            </label>
+
+            <input
+                id="excelFile"
+                type="file"
+                accept=".xlsx,.xls,.csv"
+            >
+        </div>
+
+    </div>
+
+
+    <div id="status" class="status">
+        Carga tu archivo Excel para comenzar.
+    </div>
+
+
+    <!-- EMPTY -->
+
+    <div id="emptyScreen" class="empty">
+
+        <strong>Dashboard listo</strong>
+
+        <br><br>
+
+        Selecciona tu archivo Excel utilizando el botón
+        <strong>Cargar Excel</strong>.
+
+        <br><br>
+
+        El dashboard utilizará automáticamente la primera hoja
+        del archivo.
+
+    </div>
+
+
+    <!-- DASHBOARD -->
+
+    <div id="dashboard" style="display:none;">
+
+
+        <!-- DATE -->
+
+        <div class="date-bar">
+
+            <div class="date-label">
+                FECHA
+            </div>
+
+            <select id="dateSelector"></select>
+
+        </div>
+
+
+        <!-- KPI CARDS -->
+
+        <div class="cards">
+
+            <div class="card">
+
+                <div class="card-label">
+                    N.º Bonos
+                </div>
+
+                <div
+                    id="kpiBonds"
+                    class="card-value"
+                >
+                    —
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-label">
+                    Peso ETFPESOV
+                </div>
+
+                <div
+                    id="kpiETF"
+                    class="card-value"
+                >
+                    —
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-label">
+                    Peso Benchmark
+                </div>
+
+                <div
+                    id="kpiBenchmark"
+                    class="card-value"
+                >
+                    —
+                </div>
+
+            </div>
+
+
+            <div class="card">
+
+                <div class="card-label">
+                    Cash
+                </div>
+
+                <div
+                    id="kpiCash"
+                    class="card-value"
+                >
+                    —
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CURVA SOBERANA -->
+
+        <div class="panel">
+
+            <div class="panel-title">
+                Curva soberana
+            </div>
+
+            <div
+                id="curveChart"
+                class="main-chart"
+            ></div>
+
+            <div class="chart-note">
+
+                X: Vencimiento ·
+                Y: YTM ·
+                Cada punto representa un bono.
+
+            </div>
+
+        </div>
+
+
+        <!-- TWO CHARTS -->
+
+        <div class="two-columns">
+
+
+            <!-- DIFFERENCE -->
+
+            <div class="panel">
+
+                <div class="panel-title">
+                    Diferencia de pesos
+                </div>
+
+                <div
+                    id="differenceChart"
+                    class="small-chart"
+                ></div>
+
+            </div>
+
+
+            <!-- ETF VS BENCHMARK -->
+
+            <div class="panel">
+
+                <div class="panel-title">
+                    Peso ETF vs Benchmark
+                </div>
+
+                <div
+                    id="comparisonChart"
+                    class="small-chart"
+                ></div>
+
+            </div>
+
+        </div>
+
+
+        <!-- TABLE -->
+
+        <div class="panel">
+
+            <div class="panel-title">
+                Detalle de bonos
+            </div>
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+
+                        <tr>
+
+                            <th>Bono</th>
+
+                            <th>Vencimiento</th>
+
+                            <th>Peso Benchmark</th>
+
+                            <th>Peso ETFPESOV</th>
+
+                            <th>Diferencia</th>
+
+                            <th>Dur. VALMER</th>
+
+                            <th>YTM VALMER</th>
+
+                            <th>Dur. MEF</th>
+
+                            <th>YTM MEF</th>
+
+                        </tr>
+
+                    </thead>
+
+                    <tbody id="bondTable">
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* =========================================================
+   CONFIGURACIÓN
+========================================================= */
+
+const REQUIRED_COLUMNS = [
+
+    "Fecha",
+    "Bono",
+    "Vencimiento",
+    "Duración VALMER",
+    "YTM VALMER",
+    "Duración MEF",
+    "YTM MEF",
+    "Peso Benchmark",
+    "Peso ETFPESOV",
+    "Diferencia de Pesos"
+
+];
+
+
+/* =========================================================
+   VARIABLES
+========================================================= */
+
+let dataset = [];
+
+
+/* =========================================================
+   NORMALIZAR COLUMNAS
+========================================================= */
+
+function normalizeText(value) {
+
+    return String(value ?? "")
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLowerCase();
+
+}
+
+
+const aliases = {
+
+    "fecha": "Fecha",
+
+    "bono": "Bono",
+
+    "vencimiento": "Vencimiento",
+
+    "duracion valmer":
+        "Duración VALMER",
+
+    "ytm valmer":
+        "YTM VALMER",
+
+    "duracion mef":
+        "Duración MEF",
+
+    "ytm mef":
+        "YTM MEF",
+
+    "peso benchmark":
+        "Peso Benchmark",
+
+    "peso etfpesov":
+        "Peso ETFPESOV",
+
+    "diferencia de pesos":
+        "Diferencia de Pesos"
+
+};
+
+
+/* =========================================================
+   FECHAS
+========================================================= */
+
+function parseDate(value) {
+
+    if (
+        value instanceof Date &&
+        !isNaN(value)
+    ) {
+
+        return new Date(
+            value.getFullYear(),
+            value.getMonth(),
+            value.getDate()
+        );
+
+    }
+
+
+    /* Excel serial */
+
+    if (typeof value === "number") {
+
+        const parsed =
+            XLSX.SSF.parse_date_code(value);
+
+        if (parsed) {
+
+            return new Date(
+                parsed.y,
+                parsed.m - 1,
+                parsed.d
+            );
+
+        }
+
+    }
+
+
+    const text =
+        String(value ?? "").trim();
+
+
+    /* dd/mm/yyyy */
+
+    const match =
+        text.match(
+            /^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/
+        );
+
+
+    if (match) {
+
+        return new Date(
+            Number(match[3]),
+            Number(match[2]) - 1,
+            Number(match[1])
+        );
+
+    }
+
+
+    const date =
+        new Date(text);
+
+
+    if (!isNaN(date)) {
+
+        return new Date(
+            date.getFullYear(),
+            date.getMonth(),
+            date.getDate()
+        );
+
+    }
+
+
+    return null;
+
+}
+
+
+function dateKey(date) {
+
+    return date
+        .toISOString()
+        .slice(0,10);
+
+}
+
+
+function dateLabel(key) {
+
+    const [
+        year,
+        month,
+        day
+    ] = key.split("-");
+
+    return `${day}/${month}/${year}`;
+
+}
+
+
+/* =========================================================
+   NÚMEROS
+========================================================= */
+
+function parseNumber(value) {
+
+    if (
+        value === null ||
+        value === undefined ||
+        value === ""
+    ) {
+
+        return null;
+
+    }
+
+
+    if (typeof value === "number") {
+
+        return value;
+
+    }
+
+
+    let text =
+        String(value)
+            .trim()
+            .replace(/\s/g, "");
+
+
+    const percentage =
+        text.endsWith("%");
+
+
+    if (percentage) {
+
+        text =
+            text.slice(0,-1);
+
+    }
+
+
+    text =
+        text.replace(/,/g,"");
+
+
+    const number =
+        parseFloat(text);
+
+
+    if (isNaN(number)) {
+
+        return null;
+
+    }
+
+
+    return percentage
+        ? number / 100
+        : number;
+
+}
+
+
+/* =========================================================
+   FORMATOS
+========================================================= */
+
+function formatPercentage(value) {
+
+    if (value === null || value === undefined) {
+
+        return "—";
+
+    }
+
+    return (
+        value * 100
+    ).toFixed(2) + "%";
+
+}
+
+
+function formatYTM(value) {
+
+    if (value === null || value === undefined) {
+
+        return "—";
+
+    }
+
+    return (value*100).toFixed(3) + "%";
+
+}
+
+
+function formatDuration(value) {
+
+    if (value === null || value === undefined) {
+
+        return "—";
+
+    }
+
+    return value.toFixed(4);
+
+}
+
+
+/* =========================================================
+   ESCAPE HTML
+========================================================= */
+
+function escapeHTML(value) {
+
+    return String(value)
+        .replace(
+            /[&<>"']/g,
+            character => {
+
+                const entities = {
+
+                    "&": "&amp;",
+                    "<": "&lt;",
+                    ">": "&gt;",
+                    '"': "&quot;",
+                    "'": "&#039;"
+
+                };
+
+                return entities[character];
+
+            }
+        );
+
+}
+
+
+/* =========================================================
+   CARGAR EXCEL AUTOMÁTICAMENTE
+========================================================= */
+
+async function loadExcel() {
+
+    try {
+
+        /*
+         * Cargar Excel desde GitHub Pages
+         *
+         * index.html y datos.xlsx
+         * están en la misma carpeta.
+         */
+
+        const response =
+            await fetch(
+                "etfpesov_dashboard nuevo.xlsx?v=" + Date.now()
+            );
+
+
+        if (!response.ok) {
+
+            throw new Error(
+                "No se pudo encontrar el archivo datos.xlsx."
+            );
+
+        }
+
+
+        const arrayBuffer =
+            await response.arrayBuffer();
+
+
+        const workbook =
+            XLSX.read(
+                new Uint8Array(
+                    arrayBuffer
+                ),
+                {
+                    type: "array",
+                    cellDates: true
+                }
+            );
+
+
+        /*
+         * Primera hoja
+         */
+
+        const sheet =
+            workbook.Sheets[
+                workbook.SheetNames[0]
+            ];
+
+
+        const rawData =
+            XLSX.utils.sheet_to_json(
+                sheet,
+                {
+                    defval: ""
+                }
+            );
+
+
+        if (!rawData.length) {
+
+            throw new Error(
+                "La primera hoja está vacía."
+            );
+
+        }
+
+
+        /*
+         * Detectar columnas
+         */
+
+        const columnMap = {};
+
+
+        Object
+            .keys(rawData[0])
+            .forEach(
+                originalColumn => {
+
+                    const normalized =
+                        normalizeText(
+                            originalColumn
+                        );
+
+
+                    const standard =
+                        aliases[
+                            normalized
+                        ];
+
+
+                    if (standard) {
+
+                        columnMap[
+                            standard
+                        ] =
+                            originalColumn;
+
+                    }
+
+                }
+            );
+
+
+        const missing =
+            REQUIRED_COLUMNS.filter(
+                column =>
+                    !columnMap[column]
+            );
+
+
+        if (missing.length) {
+
+            throw new Error(
+                "Faltan estas columnas:\n\n" +
+                missing.join("\n")
+            );
+
+        }
+
+
+        /*
+         * Convertir data
+         */
+
+        dataset =
+            rawData
+                .map(row => {
+
+                    const fecha =
+                        parseDate(
+                            row[
+                                columnMap[
+                                    "Fecha"
+                                ]
+                            ]
+                        );
+
+
+                    const vencimiento =
+                        parseDate(
+                            row[
+                                columnMap[
+                                    "Vencimiento"
+                                ]
+                            ]
+                        );
+
+
+                    return {
+
+                        Fecha:
+                            fecha
+                                ? dateKey(fecha)
+                                : null,
+
+                        Bono:
+                            String(
+                                row[
+                                    columnMap[
+                                        "Bono"
+                                    ]
+                                ] ?? ""
+                            ).trim(),
+
+                        Vencimiento:
+                            vencimiento
+                                ? dateKey(
+                                    vencimiento
+                                )
+                                : null,
+
+                        DurValmer:
+                            parseNumber(
+                                row[
+                                    columnMap[
+                                        "Duración VALMER"
+                                    ]
+                                ]
+                            ),
+
+                        YtmValmer:
+                            parseNumber(
+                                row[
+                                    columnMap[
+                                        "YTM VALMER"
+                                    ]
+                                ]
+                            ),
+
+                        DurMef:
+                            parseNumber(
+                                row[
+                                    columnMap[
+                                        "Duración MEF"
+                                    ]
+                                ]
+                            ),
+
+                        YtmMef:
+                            parseNumber(
+                                row[
+                                    columnMap[
+                                        "YTM MEF"
+                                    ]
+                                ]
+                            ),
+
+                        PesoBenchmark:
+                            parseNumber(
+                                row[
+                                    columnMap[
+                                        "Peso Benchmark"
+                                    ]
+                                ]
+                            ),
+
+                        PesoETF:
+                            parseNumber(
+                                row[
+                                    columnMap[
+                                        "Peso ETFPESOV"
+                                    ]
+                                ]
+                            ),
+
+                        Diferencia:
+                            parseNumber(
+                                row[
+                                    columnMap[
+                                        "Diferencia de Pesos"
+                                    ]
+                                ]
+                            )
+
+                    };
+
+                })
+                .filter(
+                    row =>
+                        row.Fecha &&
+                        row.Bono &&
+                        row.Vencimiento
+                );
+
+
+        /*
+         * Fechas disponibles
+         */
+
+        const dates =
+            [
+                ...new Set(
+                    dataset.map(
+                        row =>
+                            row.Fecha
+                    )
+                )
+            ]
+            .sort()
+            .reverse();
+
+
+        const selector =
+            document
+                .getElementById(
+                    "dateSelector"
+                );
+
+
+        selector.innerHTML =
+            dates
+                .map(
+                    date => `
+                        <option value="${date}">
+                            ${dateLabel(date)}
+                        </option>
+                    `
+                )
+                .join("");
+
+
+        /*
+         * Mostrar dashboard
+         */
+
+        document
+            .getElementById(
+                "emptyScreen"
+            )
+            .style.display =
+            "none";
+
+
+        document
+            .getElementById(
+                "dashboard"
+            )
+            .style.display =
+            "block";
+
+
+        /*
+         * Estado del dashboard
+         */
+
+        document
+            .getElementById(
+                "status"
+            )
+            .textContent =
+            `datos.xlsx · ` +
+            `${dataset.length.toLocaleString()} registros · ` +
+            `${dates.length} fechas disponibles`;
+
+
+        /*
+         * Renderizar dashboard
+         */
+
+        renderDashboard();
+
+
+    }
+    catch(error) {
+
+        console.error(
+            "Error cargando Excel:",
+            error
+        );
+
+
+        alert(
+            "No se pudo cargar el archivo.\n\n" +
+            error.message
+        );
+
+    }
+
+}
+
+
+/*
+ * Ejecutar automáticamente
+ */
+
+loadExcel();
+
+
+/* =========================================================
+   CAMBIO DE FECHA
+========================================================= */
+
+document
+    .getElementById("dateSelector")
+    .addEventListener(
+        "change",
+        renderDashboard
+    );
+
+
+/* =========================================================
+   RENDER PRINCIPAL
+========================================================= */
+
+function renderDashboard() {
+
+    const selectedDate =
+        document
+            .getElementById(
+                "dateSelector"
+            )
+            .value;
+
+
+    let data =
+        dataset
+            .filter(
+                row =>
+                    row.Fecha === selectedDate
+            )
+            .sort(
+                (a,b) =>
+                    a.Vencimiento
+                        .localeCompare(
+                            b.Vencimiento
+                        )
+            );
+
+
+    if (!data.length) {
+
+        return;
+
+    }
+
+
+    /*
+     * KPIs
+     */
+
+    const uniqueBonds =
+        new Set(
+            data.map(
+                row => row.Bono
+            )
+        );
+
+
+    const totalETF =
+        data.reduce(
+            (sum,row) =>
+                sum +
+                (
+                    row.PesoETF ?? 0
+                ),
+            0
+        );
+
+
+    const totalBenchmark =
+        data.reduce(
+            (sum,row) =>
+                sum +
+                (
+                    row.PesoBenchmark ?? 0
+                ),
+            0
+        );
+
+
+    /*
+     * Active Weight
+     *
+     * Σ |ETF - Benchmark|
+     */
+
+    const cashResidual =
+    	1 -
+    	data.reduce(
+            (sum, row) =>
+            	sum + (row.PesoETF ?? 0),
+            0
+    	);
+
+    document
+        .getElementById(
+            "kpiBonds"
+        )
+        .textContent =
+        uniqueBonds.size;
+
+
+    document
+        .getElementById(
+            "kpiETF"
+        )
+        .textContent =
+        formatPercentage(
+            totalETF
+        );
+
+
+    document
+        .getElementById(
+            "kpiBenchmark"
+        )
+        .textContent =
+        formatPercentage(
+            totalBenchmark
+        );
+
+
+    document
+        .getElementById(
+            "kpiCash"
+        )
+        .textContent =
+        formatPercentage(
+            cashResidual
+        );
+
+
+    /*
+     * Gráficos
+     */
+
+    renderCurve(data);
+
+    renderDifference(data);
+
+    renderComparison(data);
+
+    renderTable(data);
+
+}
+
+
+/* =========================================================
+   CONFIGURACIÓN BASE PLOTLY
+========================================================= */
+
+const baseLayout = {
+
+    margin: {
+        l: 55,
+        r: 25,
+        t: 10,
+        b: 55
+    },
+
+    paper_bgcolor: "white",
+
+    plot_bgcolor: "white",
+
+    font: {
+        family:
+            "Segoe UI, Arial, sans-serif",
+        size: 11,
+        color: "#374151"
+    }
+
+};
+
+
+/* =========================================================
+   CURVA SOBERANA
+========================================================= */
+
+function renderCurve(data) {
+
+    const valmer =
+        data.filter(
+            row =>
+                row.YtmValmer !== null
+        );
+
+
+    const mef =
+        data.filter(
+            row =>
+                row.YtmMef !== null
+        );
+
+
+    const traces = [];
+
+
+    /*
+     * VALMER
+     */
+
+    if (valmer.length) {
+
+        traces.push({
+
+            x:
+                valmer.map(
+                    row =>
+                        row.Vencimiento
+                ),
+
+            y:
+                valmer.map(
+                    row =>
+                        row.YtmValmer * 100
+                ),
+
+            mode:
+                "lines+markers",
+
+            name:
+                "YTM VALMER",
+
+            marker: {
+                size: 8
+            },
+
+            line: {
+                width: 2
+            },
+
+            customdata:
+                valmer.map(
+                    row => [
+
+                        row.Bono,
+
+                        row.Vencimiento,
+
+                        row.YtmValmer,
+
+                        row.YtmMef,
+
+                        row.DurValmer,
+
+                        row.DurMef,
+
+                        row.PesoETF,
+
+                        row.PesoBenchmark,
+
+                        row.Diferencia
+
+                    ]
+                ),
+
+            hovertemplate:
+
+                "<b>%{customdata[0]}</b>" +
+
+                "<br>Vencimiento: %{customdata[1]}" +
+
+                "<br>YTM VALMER: %{customdata[2]:.3%}" +
+
+                "<br>YTM MEF: %{customdata[3]:.3%}" +
+
+                "<br>Duración VALMER: %{customdata[4]:.4f}" +
+
+                "<br>Duración MEF: %{customdata[5]:.4f}" +
+
+                "<br>Peso ETF: %{customdata[6]:.2%}" +
+
+                "<br>Peso Benchmark: %{customdata[7]:.2%}" +
+
+                "<br>Δ Peso: %{customdata[8]:.2%}" +
+
+                "<extra></extra>"
+
+        });
+
+    }
+
+
+    /*
+     * MEF
+     */
+
+    if (mef.length) {
+
+        traces.push({
+
+            x:
+                mef.map(
+                    row =>
+                        row.Vencimiento
+                ),
+
+            y:
+                mef.map(
+                    row =>
+                        row.YtmMef * 100
+                ),
+
+            mode:
+                "lines+markers",
+
+            name:
+                "YTM MEF",
+
+            marker: {
+                size: 8
+            },
+
+            line: {
+                width: 2,
+                dash: "dash"
+            },
+
+            customdata:
+                mef.map(
+                    row => [
+
+                        row.Bono,
+
+                        row.Vencimiento,
+
+                        row.YtmValmer,
+
+                        row.YtmMef,
+
+                        row.DurValmer,
+
+                        row.DurMef,
+
+                        row.PesoETF,
+
+                        row.PesoBenchmark,
+
+                        row.Diferencia
+
+                    ]
+                ),
+
+            hovertemplate:
+
+                "<b>%{customdata[0]}</b>" +
+
+                "<br>Vencimiento: %{customdata[1]}" +
+
+                "<br>YTM VALMER: %{customdata[2]:.3%}" +
+
+                "<br>YTM MEF: %{customdata[3]:.3%}" +
+
+                "<br>Duración VALMER: %{customdata[4]:.4f}" +
+
+                "<br>Duración MEF: %{customdata[5]:.4f}" +
+
+                "<br>Peso ETF: %{customdata[6]:.2%}" +
+
+                "<br>Peso Benchmark: %{customdata[7]:.2%}" +
+
+                "<br>Δ Peso: %{customdata[8]:.2%}" +
+
+                "<extra></extra>"
+
+        });
+
+    }
+
+
+    Plotly.react(
+
+        "curveChart",
+
+        traces,
+
+        {
+
+            ...baseLayout,
+
+            xaxis: {
+
+                title:
+                    "Vencimiento",
+
+                type:
+                    "date",
+
+                gridcolor:
+                    "#eef0f2"
+
+            },
+
+            yaxis: {
+
+                title:
+                    "YTM (%)",
+
+                ticksuffix:
+                    "%",
+
+                gridcolor:
+                    "#eef0f2"
+
+            },
+
+            legend: {
+
+                orientation:
+                    "h",
+
+                y:
+                    1.08,
+
+                x:
+                    0
+
+            }
+
+        },
+
+        {
+            responsive: true,
+            displaylogo: false
+        }
+
+    );
+
+}
+
+
+/* =========================================================
+   DIFERENCIA DE PESOS
+========================================================= */
+
+function renderDifference(data) {
+
+    const sorted =
+        [...data].sort(
+            (a,b) =>
+                Math.abs(
+                    b.Diferencia ?? 0
+                )
+                -
+                Math.abs(
+                    a.Diferencia ?? 0
+                )
+        );
+
+
+    Plotly.react(
+
+        "differenceChart",
+
+        [{
+
+            x:
+                sorted.map(
+                    row =>
+                        (
+                            row.Diferencia ??
+                            0
+                        ) * 100
+                ),
+
+            y:
+                sorted.map(
+                    row =>
+                        row.Bono
+                ),
+
+            type:
+                "bar",
+
+            orientation:
+                "h",
+
+            text:
+                sorted.map(
+                    row =>
+                        formatPercentage(
+                            row.Diferencia
+                        )
+                ),
+
+            textposition:
+                "outside",
+
+            hovertemplate:
+
+                "<b>%{y}</b>" +
+
+                "<br>Diferencia: %{x:.2f}%" +
+
+                "<extra></extra>"
+
+        }],
+
+        {
+
+            ...baseLayout,
+
+            margin: {
+
+                l: 110,
+                r: 55,
+                t: 5,
+                b: 45
+
+            },
+
+            xaxis: {
+
+                title:
+                    "Diferencia de pesos (p.p.)",
+
+                ticksuffix:
+                    "%",
+
+                gridcolor:
+                    "#eef0f2"
+
+            },
+
+            yaxis: {
+
+                autorange:
+                    "reversed"
+
+            }
+
+        },
+
+        {
+
+            responsive: true,
+            displaylogo: false
+
+        }
+
+    );
+
+}
+
+
+/* =========================================================
+   ETF VS BENCHMARK
+========================================================= */
+
+function renderComparison(data) {
+
+    const sorted =
+        [...data].sort(
+            (a,b) =>
+                (
+                    b.PesoETF ?? 0
+                )
+                -
+                (
+                    a.PesoETF ?? 0
+                )
+        );
+
+
+    const ETFTrace = {
+
+        x:
+            sorted.map(
+                row =>
+                    row.Bono
+            ),
+
+        y:
+            sorted.map(
+                row =>
+                    (
+                        row.PesoETF ??
+                        0
+                    ) * 100
+            ),
+
+        name:
+            "ETFPESOV",
+
+        type:
+            "bar",
+
+        hovertemplate:
+
+            "<b>%{x}</b>" +
+
+            "<br>ETFPESOV: %{y:.2f}%" +
+
+            "<extra></extra>"
+
+    };
+
+
+    const benchmarkTrace = {
+
+        x:
+            sorted.map(
+                row =>
+                    row.Bono
+            ),
+
+        y:
+            sorted.map(
+                row =>
+                    (
+                        row.PesoBenchmark ??
+                        0
+                    ) * 100
+            ),
+
+        name:
+            "Benchmark",
+
+        type:
+            "bar",
+
+        hovertemplate:
+
+            "<b>%{x}</b>" +
+
+            "<br>Benchmark: %{y:.2f}%" +
+
+            "<extra></extra>"
+
+    };
+
+
+    Plotly.react(
+
+        "comparisonChart",
+
+        [
+            ETFTrace,
+            benchmarkTrace
+        ],
+
+        {
+
+            ...baseLayout,
+
+            barmode:
+                "group",
+
+            margin: {
+
+                l: 50,
+                r: 20,
+                t: 5,
+                b: 80
+
+            },
+
+            xaxis: {
+
+                tickangle:
+                    -45
+
+            },
+
+            yaxis: {
+
+                title:
+                    "Peso (%)",
+
+                ticksuffix:
+                    "%"
+
+            },
+
+            legend: {
+
+                orientation:
+                    "h",
+
+                y:
+                    1.08,
+
+                x:
+                    0
+
+            }
+
+        },
+
+        {
+
+            responsive: true,
+            displaylogo: false
+
+        }
+
+    );
+
+}
+
+
+/* =========================================================
+   TABLA
+========================================================= */
+
+function renderTable(data) {
+
+    const table =
+        document.getElementById(
+            "bondTable"
+        );
+
+
+    table.innerHTML =
+
+        data
+            .map(
+                row => {
+
+                    const difference =
+                        row.Diferencia ??
+                        0;
+
+
+                    let className =
+                        "";
+
+
+                    if (
+                        difference > 0
+                    ) {
+
+                        className =
+                            "positive";
+
+                    }
+                    else if (
+                        difference < 0
+                    ) {
+
+                        className =
+                            "negative";
+
+                    }
+
+
+                    return `
+
+                        <tr>
+
+                            <td>
+                                <strong>
+                                    ${escapeHTML(
+                                        row.Bono
+                                    )}
+                                </strong>
+                            </td>
+
+                            <td>
+                                ${dateLabel(
+                                    row.Vencimiento
+                                )}
+                            </td>
+
+                            <td class="numeric">
+                                ${formatPercentage(
+                                    row.PesoBenchmark
+                                )}
+                            </td>
+
+                            <td class="numeric">
+                                ${formatPercentage(
+                                    row.PesoETF
+                                )}
+                            </td>
+
+                            <td class="numeric ${className}">
+                                ${formatPercentage(
+                                    row.Diferencia
+                                )}
+                            </td>
+
+                            <td class="numeric">
+                                ${formatDuration(
+                                    row.DurValmer
+                                )}
+                            </td>
+
+                            <td class="numeric">
+                                ${formatYTM(
+                                    row.YtmValmer
+                                )}
+                            </td>
+
+                            <td class="numeric">
+                                ${formatDuration(
+                                    row.DurMef
+                                )}
+                            </td>
+
+                            <td class="numeric">
+                                ${formatYTM(
+                                    row.YtmMef
+                                )}
+                            </td>
+
+                        </tr>
+
+                    `;
+
+                }
+            )
+            .join("");
+
+}
+
+</script>
+
+</body>
+</html>
