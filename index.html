@@ -325,11 +325,11 @@ tr:hover td {
 
     <div id="emptyScreen" class="empty">
 
-        <strong>Dashboard listo</strong>
+        <strong>Cargando dashboard...</strong>
 
         <br><br>
 
-        Selecciona tu archivo Excel utilizando el botón
+        Los datos se están cargando automáticamente.
 
     </div>
 
@@ -869,20 +869,20 @@ async function loadExcel() {
         /*
          * Cargar Excel desde GitHub Pages
          *
-         * index.html y datos.xlsx
+         * index.html y Componentes ETFPESOV.xlsx
          * están en la misma carpeta.
          */
 
         const response =
             await fetch(
-                "etfpesov_dashboard nuevo.xlsx?v=" + Date.now()
+                "./Componentes%20ETFPESOV.xlsx?v=" + Date.now()
             );
 
 
         if (!response.ok) {
 
             throw new Error(
-                "No se pudo encontrar el archivo datos.xlsx."
+                `No se pudo encontrar Componentes ETFPESOV.xlsx. HTTP ${response.status}`
             );
 
         }
