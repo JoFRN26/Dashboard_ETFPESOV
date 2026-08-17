@@ -158,7 +158,7 @@
     <input type="file" class="file-input" id="fileInput" accept=".xlsx,.xls,.csv" onchange="handleFile(event)">
     <div class="status">
       <div class="dot"></div>
-      <span id="status-text">Mostrando datos de ejemplo — carga tu Excel para reemplazarlos</span>
+      <span id="status-text">Cargando Data-ETFPESOV.xlsx...</span>
     </div>
   </div>
 
@@ -814,6 +814,48 @@ function handleFile(evt) {
   }
 }
 
+
+// ── Cargar Excel automáticamente desde GitHub Pages ────────────────
+async function loadDefaultExcel() {
+  try {
+    document.getElementById('status-text').textContent =
+      'Cargando Data-ETFPESOV.xlsx...';
+
+    const response = await fetch(
+      './Data-ETFPESOV.xlsx?v=' + Date.now(),
+      { cache: 'no-store' }
+    );
+
+    if (!response.ok) {
+      throw new Error(
+        'No se pudo encontrar Data-ETFPESOV.xlsx. HTTP ' + response.status
+      );
+    }
+
+    const blob = await response.blob();
+
+    const file = new File(
+      [blob],
+      'Data-ETFPESOV.xlsx',
+      {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+      }
+    );
+
+    // Reutiliza toda la lógica de lectura y renderizado ya existente.
+    handleFile({
+      target: {
+        files: [file]
+      }
+    });
+
+  } catch (err) {
+    console.error('Error cargando Data-ETFPESOV.xlsx:', err);
+    document.getElementById('status-text').textContent =
+      'Error al cargar Data-ETFPESOV.xlsx: ' + err.message;
+  }
+}
+
 const dz = document.getElementById('dropzone');
 dz.addEventListener('dragover', e => { e.preventDefault(); dz.style.background='var(--surface2)'; });
 dz.addEventListener('dragleave', () => { dz.style.background=''; });
@@ -825,6 +867,9 @@ dz.addEventListener('drop', e => {
 
 syncDateControls();
 renderCharts();
+
+// Cargar automáticamente el Excel publicado junto con este index.html
+loadDefaultExcel();
 </script>
 </body>
 </html>
