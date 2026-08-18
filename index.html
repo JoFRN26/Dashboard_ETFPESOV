@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -42,6 +44,7 @@ body {
     padding: 28px;
 }
 
+
 /* =========================
    HEADER
 ========================= */
@@ -65,23 +68,6 @@ body {
     margin-top: 5px;
 }
 
-.upload-label {
-    background: var(--primary);
-    color: white;
-    padding: 10px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    font-size: 13px;
-}
-
-.upload-label:hover {
-    opacity: 0.9;
-}
-
-input[type="file"] {
-    display: none;
-}
 
 /* =========================
    STATUS
@@ -92,6 +78,7 @@ input[type="file"] {
     font-size: 12px;
     margin-bottom: 15px;
 }
+
 
 /* =========================
    DATE SELECTOR
@@ -118,6 +105,7 @@ select {
     padding: 9px 13px;
     font-size: 13px;
 }
+
 
 /* =========================
    KPI CARDS
@@ -151,6 +139,13 @@ select {
     margin-top: 8px;
 }
 
+.card-note {
+    color: var(--muted);
+    font-size: 10px;
+    margin-top: 5px;
+}
+
+
 /* =========================
    PANELS
 ========================= */
@@ -169,6 +164,7 @@ select {
     font-weight: 700;
     margin: 3px 4px 12px;
 }
+
 
 /* =========================
    CHARTS
@@ -194,6 +190,7 @@ select {
     margin: 7px 4px 0;
 }
 
+
 /* =========================
    TABLE
 ========================= */
@@ -218,6 +215,7 @@ th {
     text-align: center;
     padding: 10px;
     border-bottom: 1px solid var(--border);
+    z-index: 1;
 }
 
 td {
@@ -245,6 +243,19 @@ tr:hover td {
     font-weight: 600;
 }
 
+/* Fila Cash */
+
+.cash-row td {
+    background: #f8fafc;
+    border-top: 2px solid var(--border);
+    font-weight: 600;
+}
+
+.cash-row:hover td {
+    background: #f3f6f9;
+}
+
+
 /* =========================
    EMPTY SCREEN
 ========================= */
@@ -257,6 +268,7 @@ tr:hover td {
     border: 1px solid var(--border);
     border-radius: 12px;
 }
+
 
 /* =========================
    RESPONSIVE
@@ -295,26 +307,35 @@ tr:hover td {
 }
 
 </style>
+
 </head>
+
 
 <body>
 
 <div class="container">
+
 
     <!-- HEADER -->
 
     <div class="header">
 
         <div>
-            <h1 class="title">ETFPESOV</h1>
+
+            <h1 class="title">
+                ETFPESOV
+            </h1>
 
             <div class="subtitle">
                 Bond Composition & Benchmark
             </div>
+
         </div>
 
     </div>
 
+
+    <!-- STATUS -->
 
     <div id="status" class="status">
         Cargando datos...
@@ -325,7 +346,9 @@ tr:hover td {
 
     <div id="emptyScreen" class="empty">
 
-        <strong>Cargando dashboard...</strong>
+        <strong>
+            Cargando dashboard...
+        </strong>
 
         <br><br>
 
@@ -356,6 +379,9 @@ tr:hover td {
 
         <div class="cards">
 
+
+            <!-- NÚMERO DE BONOS -->
+
             <div class="card">
 
                 <div class="card-label">
@@ -369,8 +395,14 @@ tr:hover td {
                     —
                 </div>
 
+                <div class="card-note">
+                    ETFPESOV / Total base
+                </div>
+
             </div>
 
+
+            <!-- PESO ETF -->
 
             <div class="card">
 
@@ -388,6 +420,8 @@ tr:hover td {
             </div>
 
 
+            <!-- PESO BENCHMARK -->
+
             <div class="card">
 
                 <div class="card-label">
@@ -404,6 +438,8 @@ tr:hover td {
             </div>
 
 
+            <!-- CASH -->
+
             <div class="card">
 
                 <div class="card-label">
@@ -418,6 +454,7 @@ tr:hover td {
                 </div>
 
             </div>
+
 
         </div>
 
@@ -451,7 +488,7 @@ tr:hover td {
         <div class="two-columns">
 
 
-            <!-- DIFFERENCE -->
+            <!-- DIFERENCIA -->
 
             <div class="panel">
 
@@ -481,6 +518,7 @@ tr:hover td {
                 ></div>
 
             </div>
+
 
         </div>
 
@@ -523,9 +561,7 @@ tr:hover td {
 
                     </thead>
 
-                    <tbody id="bondTable">
-
-                    </tbody>
+                    <tbody id="bondTable"></tbody>
 
                 </table>
 
@@ -533,9 +569,11 @@ tr:hover td {
 
         </div>
 
+
     </div>
 
 </div>
+
 
 
 <script>
@@ -585,11 +623,14 @@ function normalizeText(value) {
 
 const aliases = {
 
-    "fecha": "Fecha",
+    "fecha":
+        "Fecha",
 
-    "bono": "Bono",
+    "bono":
+        "Bono",
 
-    "vencimiento": "Vencimiento",
+    "vencimiento":
+        "Vencimiento",
 
     "duracion valmer":
         "Duración VALMER",
@@ -637,10 +678,14 @@ function parseDate(value) {
 
     /* Excel serial */
 
-    if (typeof value === "number") {
+    if (
+        typeof value === "number"
+    ) {
 
         const parsed =
-            XLSX.SSF.parse_date_code(value);
+            XLSX.SSF.parse_date_code(
+                value
+            );
 
         if (parsed) {
 
@@ -656,7 +701,9 @@ function parseDate(value) {
 
 
     const text =
-        String(value ?? "").trim();
+        String(
+            value ?? ""
+        ).trim();
 
 
     /* dd/mm/yyyy */
@@ -709,6 +756,10 @@ function dateKey(date) {
 
 function dateLabel(key) {
 
+    if (!key) {
+        return "—";
+    }
+
     const [
         year,
         month,
@@ -737,7 +788,9 @@ function parseNumber(value) {
     }
 
 
-    if (typeof value === "number") {
+    if (
+        typeof value === "number"
+    ) {
 
         return value;
 
@@ -790,7 +843,10 @@ function parseNumber(value) {
 
 function formatPercentage(value) {
 
-    if (value === null || value === undefined) {
+    if (
+        value === null ||
+        value === undefined
+    ) {
 
         return "—";
 
@@ -805,20 +861,28 @@ function formatPercentage(value) {
 
 function formatYTM(value) {
 
-    if (value === null || value === undefined) {
+    if (
+        value === null ||
+        value === undefined
+    ) {
 
         return "—";
 
     }
 
-    return (value*100).toFixed(3) + "%";
+    return (
+        value * 100
+    ).toFixed(3) + "%";
 
 }
 
 
 function formatDuration(value) {
 
-    if (value === null || value === undefined) {
+    if (
+        value === null ||
+        value === undefined
+    ) {
 
         return "—";
 
@@ -850,7 +914,9 @@ function escapeHTML(value) {
 
                 };
 
-                return entities[character];
+                return entities[
+                    character
+                ];
 
             }
         );
@@ -866,23 +932,18 @@ async function loadExcel() {
 
     try {
 
-        /*
-         * Cargar Excel desde GitHub Pages
-         *
-         * index.html y Componentes ETFPESOV.xlsx
-         * están en la misma carpeta.
-         */
 
         const response =
             await fetch(
-                "./Componentes-ETFPESOV.xlsx?v=" + Date.now()
+                "./Componentes-ETFPESOV.xlsx?v=" +
+                Date.now()
             );
 
 
         if (!response.ok) {
 
             throw new Error(
-                `No se pudo encontrar Componentes ETFPESOV.xlsx. HTTP ${response.status}`
+                `No se pudo encontrar Componentes-ETFPESOV.xlsx. HTTP ${response.status}`
             );
 
         }
@@ -940,7 +1001,9 @@ async function loadExcel() {
 
 
         Object
-            .keys(rawData[0])
+            .keys(
+                rawData[0]
+            )
             .forEach(
                 originalColumn => {
 
@@ -972,7 +1035,9 @@ async function loadExcel() {
         const missing =
             REQUIRED_COLUMNS.filter(
                 column =>
-                    !columnMap[column]
+                    !columnMap[
+                        column
+                    ]
             );
 
 
@@ -992,117 +1057,121 @@ async function loadExcel() {
 
         dataset =
             rawData
-                .map(row => {
+                .map(
+                    row => {
 
-                    const fecha =
-                        parseDate(
-                            row[
-                                columnMap[
-                                    "Fecha"
-                                ]
-                            ]
-                        );
-
-
-                    const vencimiento =
-                        parseDate(
-                            row[
-                                columnMap[
-                                    "Vencimiento"
-                                ]
-                            ]
-                        );
-
-
-                    return {
-
-                        Fecha:
-                            fecha
-                                ? dateKey(fecha)
-                                : null,
-
-                        Bono:
-                            String(
+                        const fecha =
+                            parseDate(
                                 row[
                                     columnMap[
-                                        "Bono"
+                                        "Fecha"
                                     ]
-                                ] ?? ""
-                            ).trim(),
+                                ]
+                            );
 
-                        Vencimiento:
-                            vencimiento
-                                ? dateKey(
-                                    vencimiento
+
+                        const vencimiento =
+                            parseDate(
+                                row[
+                                    columnMap[
+                                        "Vencimiento"
+                                    ]
+                                ]
+                            );
+
+
+                        return {
+
+                            Fecha:
+                                fecha
+                                    ? dateKey(
+                                        fecha
+                                    )
+                                    : null,
+
+                            Bono:
+                                String(
+                                    row[
+                                        columnMap[
+                                            "Bono"
+                                        ]
+                                    ] ?? ""
+                                ).trim(),
+
+                            Vencimiento:
+                                vencimiento
+                                    ? dateKey(
+                                        vencimiento
+                                    )
+                                    : null,
+
+                            DurValmer:
+                                parseNumber(
+                                    row[
+                                        columnMap[
+                                            "Duración VALMER"
+                                        ]
+                                    ]
+                                ),
+
+                            YtmValmer:
+                                parseNumber(
+                                    row[
+                                        columnMap[
+                                            "YTM VALMER"
+                                        ]
+                                    ]
+                                ),
+
+                            DurMef:
+                                parseNumber(
+                                    row[
+                                        columnMap[
+                                            "Duración MEF"
+                                        ]
+                                    ]
+                                ),
+
+                            YtmMef:
+                                parseNumber(
+                                    row[
+                                        columnMap[
+                                            "YTM MEF"
+                                        ]
+                                    ]
+                                ),
+
+                            PesoBenchmark:
+                                parseNumber(
+                                    row[
+                                        columnMap[
+                                            "Peso Benchmark"
+                                        ]
+                                    ]
+                                ),
+
+                            PesoETF:
+                                parseNumber(
+                                    row[
+                                        columnMap[
+                                            "Peso ETFPESOV"
+                                        ]
+                                    ]
+                                ),
+
+                            Diferencia:
+                                parseNumber(
+                                    row[
+                                        columnMap[
+                                            "Diferencia de Pesos"
+                                        ]
+                                    ]
                                 )
-                                : null,
 
-                        DurValmer:
-                            parseNumber(
-                                row[
-                                    columnMap[
-                                        "Duración VALMER"
-                                    ]
-                                ]
-                            ),
+                        };
 
-                        YtmValmer:
-                            parseNumber(
-                                row[
-                                    columnMap[
-                                        "YTM VALMER"
-                                    ]
-                                ]
-                            ),
-
-                        DurMef:
-                            parseNumber(
-                                row[
-                                    columnMap[
-                                        "Duración MEF"
-                                    ]
-                                ]
-                            ),
-
-                        YtmMef:
-                            parseNumber(
-                                row[
-                                    columnMap[
-                                        "YTM MEF"
-                                    ]
-                                ]
-                            ),
-
-                        PesoBenchmark:
-                            parseNumber(
-                                row[
-                                    columnMap[
-                                        "Peso Benchmark"
-                                    ]
-                                ]
-                            ),
-
-                        PesoETF:
-                            parseNumber(
-                                row[
-                                    columnMap[
-                                        "Peso ETFPESOV"
-                                    ]
-                                ]
-                            ),
-
-                        Diferencia:
-                            parseNumber(
-                                row[
-                                    columnMap[
-                                        "Diferencia de Pesos"
-                                    ]
-                                ]
-                            )
-
-                    };
-
-                })
+                    }
+                )
                 .filter(
                     row =>
                         row.Fecha &&
@@ -1139,9 +1208,11 @@ async function loadExcel() {
             dates
                 .map(
                     date => `
+
                         <option value="${date}">
                             ${dateLabel(date)}
                         </option>
+
                     `
                 )
                 .join("");
@@ -1156,7 +1227,7 @@ async function loadExcel() {
                 "emptyScreen"
             )
             .style.display =
-            "none";
+                "none";
 
 
         document
@@ -1164,11 +1235,11 @@ async function loadExcel() {
                 "dashboard"
             )
             .style.display =
-            "block";
+                "block";
 
 
         /*
-         * Estado del dashboard
+         * Estado
          */
 
         document
@@ -1176,13 +1247,14 @@ async function loadExcel() {
                 "status"
             )
             .textContent =
-            `Componentes ETFPESOV.xlsx · ` +
-            `${dataset.length.toLocaleString()} registros · ` +
-            `${dates.length} fechas disponibles`;
+
+                `Componentes-ETFPESOV.xlsx · ` +
+                `${dataset.length.toLocaleString()} registros · ` +
+                `${dates.length} fechas disponibles`;
 
 
         /*
-         * Renderizar dashboard
+         * Renderizar
          */
 
         renderDashboard();
@@ -1219,7 +1291,9 @@ loadExcel();
 ========================================================= */
 
 document
-    .getElementById("dateSelector")
+    .getElementById(
+        "dateSelector"
+    )
     .addEventListener(
         "change",
         renderDashboard
@@ -1244,7 +1318,8 @@ function renderDashboard() {
         dataset
             .filter(
                 row =>
-                    row.Fecha === selectedDate
+                    row.Fecha ===
+                    selectedDate
             )
             .sort(
                 (a,b) =>
@@ -1262,24 +1337,52 @@ function renderDashboard() {
     }
 
 
-    /*
-     * KPIs
-     */
+    /* =====================================================
+       NÚMERO DE BONOS
 
-    const uniqueBonds =
+       Numerador:
+       bonos con Peso ETFPESOV > 0 en la fecha elegida.
+
+       Denominador:
+       todos los bonos distintos que aparecen
+       alguna vez en la base.
+    ===================================================== */
+
+    const bondsWithETFWeight =
         new Set(
-            data.map(
-                row => row.Bono
+            data
+                .filter(
+                    row =>
+                        row.PesoETF !== null &&
+                        row.PesoETF > 0
+                )
+                .map(
+                    row =>
+                        row.Bono
+                )
+        );
+
+
+    const allBonds =
+        new Set(
+            dataset.map(
+                row =>
+                    row.Bono
             )
         );
 
+
+    /* =====================================================
+       PESOS
+    ===================================================== */
 
     const totalETF =
         data.reduce(
             (sum,row) =>
                 sum +
                 (
-                    row.PesoETF ?? 0
+                    row.PesoETF ??
+                    0
                 ),
             0
         );
@@ -1290,32 +1393,51 @@ function renderDashboard() {
             (sum,row) =>
                 sum +
                 (
-                    row.PesoBenchmark ?? 0
+                    row.PesoBenchmark ??
+                    0
                 ),
             0
         );
 
 
-    /*
-     * Active Weight
-     *
-     * Σ |ETF - Benchmark|
-     */
+    /* =====================================================
+       CASH
 
-    const cashResidual =
-    	1 -
-    	data.reduce(
-            (sum, row) =>
-            	sum + (row.PesoETF ?? 0),
-            0
-    	);
+       Cash ETF:
+       1 - suma de pesos ETF
+
+       Cash Benchmark:
+       1 - suma de pesos Benchmark
+
+       Diferencia Cash:
+       ETF - Benchmark
+    ===================================================== */
+
+    const cashETF =
+        1 -
+        totalETF;
+
+
+    const cashBenchmark =
+        1 -
+        totalBenchmark;
+
+
+    const cashDifference =
+        cashETF -
+        cashBenchmark;
+
+
+    /* =====================================================
+       KPI CARDS
+    ===================================================== */
 
     document
         .getElementById(
             "kpiBonds"
         )
         .textContent =
-        uniqueBonds.size;
+            `${bondsWithETFWeight.size} / ${allBonds.size}`;
 
 
     document
@@ -1323,9 +1445,9 @@ function renderDashboard() {
             "kpiETF"
         )
         .textContent =
-        formatPercentage(
-            totalETF
-        );
+            formatPercentage(
+                totalETF
+            );
 
 
     document
@@ -1333,9 +1455,9 @@ function renderDashboard() {
             "kpiBenchmark"
         )
         .textContent =
-        formatPercentage(
-            totalBenchmark
-        );
+            formatPercentage(
+                totalBenchmark
+            );
 
 
     document
@@ -1343,22 +1465,38 @@ function renderDashboard() {
             "kpiCash"
         )
         .textContent =
-        formatPercentage(
-            cashResidual
-        );
+            formatPercentage(
+                cashETF
+            );
 
 
-    /*
-     * Gráficos
-     */
+    /* =====================================================
+       GRÁFICOS
+    ===================================================== */
 
-    renderCurve(data);
+    renderCurve(
+        data
+    );
 
-    renderDifference(data);
+    renderDifference(
+        data
+    );
 
-    renderComparison(data);
+    renderComparison(
+        data
+    );
 
-    renderTable(data);
+
+    /* =====================================================
+       TABLA
+    ===================================================== */
+
+    renderTable(
+        data,
+        cashETF,
+        cashBenchmark,
+        cashDifference
+    );
 
 }
 
@@ -1376,15 +1514,23 @@ const baseLayout = {
         b: 55
     },
 
-    paper_bgcolor: "white",
+    paper_bgcolor:
+        "white",
 
-    plot_bgcolor: "white",
+    plot_bgcolor:
+        "white",
 
     font: {
+
         family:
             "Segoe UI, Arial, sans-serif",
-        size: 11,
-        color: "#374151"
+
+        size:
+            11,
+
+        color:
+            "#374151"
+
     }
 
 };
@@ -1452,21 +1598,13 @@ function renderCurve(data) {
                     row => [
 
                         row.Bono,
-
                         row.Vencimiento,
-
                         row.YtmValmer,
-
                         row.YtmMef,
-
                         row.DurValmer,
-
                         row.DurMef,
-
                         row.PesoETF,
-
                         row.PesoBenchmark,
-
                         row.Diferencia
 
                     ]
@@ -1539,21 +1677,13 @@ function renderCurve(data) {
                     row => [
 
                         row.Bono,
-
                         row.Vencimiento,
-
                         row.YtmValmer,
-
                         row.YtmMef,
-
                         row.DurValmer,
-
                         row.DurMef,
-
                         row.PesoETF,
-
                         row.PesoBenchmark,
-
                         row.Diferencia
 
                     ]
@@ -1638,8 +1768,13 @@ function renderCurve(data) {
         },
 
         {
-            responsive: true,
-            displaylogo: false
+
+            responsive:
+                true,
+
+            displaylogo:
+                false
+
         }
 
     );
@@ -1751,8 +1886,11 @@ function renderDifference(data) {
 
         {
 
-            responsive: true,
-            displaylogo: false
+            responsive:
+                true,
+
+            displaylogo:
+                false
 
         }
 
@@ -1771,11 +1909,13 @@ function renderComparison(data) {
         [...data].sort(
             (a,b) =>
                 (
-                    b.PesoETF ?? 0
+                    b.PesoETF ??
+                    0
                 )
                 -
                 (
-                    a.PesoETF ?? 0
+                    a.PesoETF ??
+                    0
                 )
         );
 
@@ -1907,8 +2047,11 @@ function renderComparison(data) {
 
         {
 
-            responsive: true,
-            displaylogo: false
+            responsive:
+                true,
+
+            displaylogo:
+                false
 
         }
 
@@ -1921,7 +2064,12 @@ function renderComparison(data) {
    TABLA
 ========================================================= */
 
-function renderTable(data) {
+function renderTable(
+    data,
+    cashETF,
+    cashBenchmark,
+    cashDifference
+) {
 
     const table =
         document.getElementById(
@@ -1929,15 +2077,22 @@ function renderTable(data) {
         );
 
 
-    table.innerHTML =
+    /*
+     * FILAS DE BONOS
+     */
 
+    const bondRows =
         data
             .map(
                 row => {
 
+                    /*
+                     * Si Diferencia está vacía,
+                     * no la convertimos a 0 visualmente.
+                     */
+
                     const difference =
-                        row.Diferencia ??
-                        0;
+                        row.Diferencia;
 
 
                     let className =
@@ -1945,6 +2100,7 @@ function renderTable(data) {
 
 
                     if (
+                        difference !== null &&
                         difference > 0
                     ) {
 
@@ -1952,7 +2108,9 @@ function renderTable(data) {
                             "positive";
 
                     }
+
                     else if (
+                        difference !== null &&
                         difference < 0
                     ) {
 
@@ -1967,59 +2125,87 @@ function renderTable(data) {
                         <tr>
 
                             <td>
+
                                 <strong>
+
                                     ${escapeHTML(
                                         row.Bono
                                     )}
+
                                 </strong>
+
                             </td>
 
+
                             <td>
+
                                 ${dateLabel(
                                     row.Vencimiento
                                 )}
+
                             </td>
 
+
                             <td class="numeric">
+
                                 ${formatPercentage(
                                     row.PesoBenchmark
                                 )}
+
                             </td>
 
+
                             <td class="numeric">
+
                                 ${formatPercentage(
                                     row.PesoETF
                                 )}
+
                             </td>
 
+
                             <td class="numeric ${className}">
+
                                 ${formatPercentage(
                                     row.Diferencia
                                 )}
+
                             </td>
 
+
                             <td class="numeric">
+
                                 ${formatDuration(
                                     row.DurValmer
                                 )}
+
                             </td>
 
+
                             <td class="numeric">
+
                                 ${formatYTM(
                                     row.YtmValmer
                                 )}
+
                             </td>
 
+
                             <td class="numeric">
+
                                 ${formatDuration(
                                     row.DurMef
                                 )}
+
                             </td>
 
+
                             <td class="numeric">
+
                                 ${formatYTM(
                                     row.YtmMef
                                 )}
+
                             </td>
 
                         </tr>
@@ -2030,9 +2216,119 @@ function renderTable(data) {
             )
             .join("");
 
+
+    /*
+     * COLOR DE DIFERENCIA DE CASH
+     */
+
+    let cashClass =
+        "";
+
+
+    if (
+        cashDifference > 0
+    ) {
+
+        cashClass =
+            "positive";
+
+    }
+
+    else if (
+        cashDifference < 0
+    ) {
+
+        cashClass =
+            "negative";
+
+    }
+
+
+    /*
+     * FILA CASH
+     */
+
+    const cashRow = `
+
+        <tr class="cash-row">
+
+            <td>
+
+                <strong>
+                    Cash
+                </strong>
+
+            </td>
+
+
+            <td>
+                —
+            </td>
+
+
+            <td class="numeric">
+
+                ${formatPercentage(
+                    cashBenchmark
+                )}
+
+            </td>
+
+
+            <td class="numeric">
+
+                ${formatPercentage(
+                    cashETF
+                )}
+
+            </td>
+
+
+            <td class="numeric ${cashClass}">
+
+                ${formatPercentage(
+                    cashDifference
+                )}
+
+            </td>
+
+
+            <td class="numeric">
+                —
+            </td>
+
+
+            <td class="numeric">
+                —
+            </td>
+
+
+            <td class="numeric">
+                —
+            </td>
+
+
+            <td class="numeric">
+                —
+            </td>
+
+        </tr>
+
+    `;
+
+
+    /*
+     * BONOS + CASH
+     */
+
+    table.innerHTML =
+        bondRows +
+        cashRow;
+
 }
 
 </script>
 
 </body>
+
 </html>
