@@ -509,7 +509,7 @@ tr:hover td {
             <div class="panel">
 
                 <div class="panel-title">
-                    Peso ETF vs Benchmark
+                    Precio ponderado — ETFPESOV vs Benchmark
                 </div>
 
                 <div
@@ -593,7 +593,10 @@ const REQUIRED_COLUMNS = [
     "YTM MEF",
     "Peso Benchmark",
     "Peso ETFPESOV",
-    "Diferencia de Pesos"
+    "Diferencia de Pesos",
+    "Precios",
+    "Precio * Peso Benchmark",
+    "Precio * Peso ETFPESOV"
 
 ];
 
@@ -651,7 +654,16 @@ const aliases = {
         "Peso ETFPESOV",
 
     "diferencia de pesos":
-        "Diferencia de Pesos"
+        "Diferencia de Pesos",
+
+    "precios":
+        "Precios",
+
+    "precio * peso benchmark":
+        "Precio * Peso Benchmark",
+
+    "precio * peso etfpesov":
+        "Precio * Peso ETFPESOV"
 
 };
 
@@ -1164,6 +1176,33 @@ async function loadExcel() {
                                     row[
                                         columnMap[
                                             "Diferencia de Pesos"
+                                        ]
+                                    ]
+                                ),
+
+                            Precio:
+                                parseNumber(
+                                    row[
+                                        columnMap[
+                                            "Precios"
+                                        ]
+                                    ]
+                                ),
+
+                            PrecioPesoBenchmark:
+                                parseNumber(
+                                    row[
+                                        columnMap[
+                                            "Precio * Peso Benchmark"
+                                        ]
+                                    ]
+                                ),
+
+                            PrecioPesoETF:
+                                parseNumber(
+                                    row[
+                                        columnMap[
+                                            "Precio * Peso ETFPESOV"
                                         ]
                                     ]
                                 )
@@ -1900,7 +1939,7 @@ function renderDifference(data) {
 
 
 /* =========================================================
-   ETF VS BENCHMARK
+   PRECIO PONDERADO — ETF VS BENCHMARK
 ========================================================= */
 
 function renderComparison(data) {
@@ -1908,155 +1947,77 @@ function renderComparison(data) {
     const sorted =
         [...data].sort(
             (a,b) =>
-                (
-                    b.PesoETF ??
-                    0
-                )
-                -
-                (
-                    a.PesoETF ??
-                    0
-                )
+                (b.PrecioPesoETF ?? 0) -
+                (a.PrecioPesoETF ?? 0)
         );
-
 
     const ETFTrace = {
 
-        x:
-            sorted.map(
-                row =>
-                    row.Bono
-            ),
+        x: sorted.map(row => row.Bono),
 
-        y:
-            sorted.map(
-                row =>
-                    (
-                        row.PesoETF ??
-                        0
-                    ) * 100
-            ),
+        y: sorted.map(row => row.PrecioPesoETF ?? 0),
 
-        name:
-            "ETFPESOV",
+        name: "ETFPESOV",
 
-        type:
-            "bar",
+        type: "bar",
+
+        customdata: sorted.map(row => [
+            row.Precio,
+            row.PesoETF,
+            row.PrecioPesoETF
+        ]),
 
         hovertemplate:
-
             "<b>%{x}</b>" +
-
-            "<br>ETFPESOV: %{y:.2f}%" +
-
+            "<br>Precio: %{customdata[0]:.3f}" +
+            "<br>Peso ETFPESOV: %{customdata[1]:.2%}" +
+            "<br>Precio ponderado ETFPESOV: %{customdata[2]:.4f}" +
             "<extra></extra>"
 
     };
-
 
     const benchmarkTrace = {
 
-        x:
-            sorted.map(
-                row =>
-                    row.Bono
-            ),
+        x: sorted.map(row => row.Bono),
 
-        y:
-            sorted.map(
-                row =>
-                    (
-                        row.PesoBenchmark ??
-                        0
-                    ) * 100
-            ),
+        y: sorted.map(row => row.PrecioPesoBenchmark ?? 0),
 
-        name:
-            "Benchmark",
+        name: "Benchmark",
 
-        type:
-            "bar",
+        type: "bar",
+
+        customdata: sorted.map(row => [
+            row.Precio,
+            row.PesoBenchmark,
+            row.PrecioPesoBenchmark
+        ]),
 
         hovertemplate:
-
             "<b>%{x}</b>" +
-
-            "<br>Benchmark: %{y:.2f}%" +
-
+            "<br>Precio: %{customdata[0]:.3f}" +
+            "<br>Peso Benchmark: %{customdata[1]:.2%}" +
+            "<br>Precio ponderado Benchmark: %{customdata[2]:.4f}" +
             "<extra></extra>"
 
     };
-
 
     Plotly.react(
 
         "comparisonChart",
 
-        [
-            ETFTrace,
-            benchmarkTrace
-        ],
+        [ETFTrace, benchmarkTrace],
 
         {
-
             ...baseLayout,
-
-            barmode:
-                "group",
-
-            margin: {
-
-                l: 50,
-                r: 20,
-                t: 5,
-                b: 80
-
-            },
-
-            xaxis: {
-
-                tickangle:
-                    -45
-
-            },
-
-            yaxis: {
-
-                title:
-                    "Peso (%)",
-
-                ticksuffix:
-                    "%"
-
-            },
-
-            legend: {
-
-                orientation:
-                    "h",
-
-                y:
-                    1.08,
-
-                x:
-                    0
-
-            }
-
+            barmode: "group",
+            margin: { l: 60, r: 20, t: 5, b: 80 },
+            xaxis: { tickangle: -45 },
+            yaxis: { title: "Precio × peso" },
+            legend: { orientation: "h", y: 1.08, x: 0 }
         },
 
-        {
-
-            responsive:
-                true,
-
-            displaylogo:
-                false
-
-        }
-
+        { responsive: true, displaylogo: false }
     );
-
 }
 
 
