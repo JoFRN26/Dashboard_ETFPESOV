@@ -509,7 +509,7 @@ tr:hover td {
             <div class="panel">
 
                 <div class="panel-title">
-                    Precio ponderado — ETFPESOV vs Benchmark
+                    Contribución por variación de precio — ETFPESOV vs Benchmark
                 </div>
 
                 <div
@@ -1939,7 +1939,7 @@ function renderDifference(data) {
 
 
 /* =========================================================
-   PRECIO PONDERADO — ETF VS BENCHMARK
+   CONTRIBUCIÓN POR VARIACIÓN DE PRECIO — ETF VS BENCHMARK
 ========================================================= */
 
 function renderComparison(data) {
@@ -1955,7 +1955,7 @@ function renderComparison(data) {
 
         x: sorted.map(row => row.Bono),
 
-        y: sorted.map(row => row.PrecioPesoETF ?? 0),
+        y: sorted.map(row => (row.PrecioPesoETF ?? 0) * 100),
 
         name: "ETFPESOV",
 
@@ -1969,9 +1969,9 @@ function renderComparison(data) {
 
         hovertemplate:
             "<b>%{x}</b>" +
-            "<br>Precio: %{customdata[0]:.3f}" +
+            "<br>Variación diaria: %{customdata[0]:.3%}" +
             "<br>Peso ETFPESOV: %{customdata[1]:.2%}" +
-            "<br>Precio ponderado ETFPESOV: %{customdata[2]:.4f}" +
+            "<br>Contribución ETFPESOV: %{customdata[2]:.4%}" +
             "<extra></extra>"
 
     };
@@ -1980,7 +1980,7 @@ function renderComparison(data) {
 
         x: sorted.map(row => row.Bono),
 
-        y: sorted.map(row => row.PrecioPesoBenchmark ?? 0),
+        y: sorted.map(row => (row.PrecioPesoBenchmark ?? 0) * 100),
 
         name: "Benchmark",
 
@@ -1994,9 +1994,9 @@ function renderComparison(data) {
 
         hovertemplate:
             "<b>%{x}</b>" +
-            "<br>Precio: %{customdata[0]:.3f}" +
+            "<br>Variación diaria: %{customdata[0]:.3%}" +
             "<br>Peso Benchmark: %{customdata[1]:.2%}" +
-            "<br>Precio ponderado Benchmark: %{customdata[2]:.4f}" +
+            "<br>Contribución Benchmark: %{customdata[2]:.4%}" +
             "<extra></extra>"
 
     };
@@ -2012,7 +2012,7 @@ function renderComparison(data) {
             barmode: "group",
             margin: { l: 60, r: 20, t: 5, b: 80 },
             xaxis: { tickangle: -45 },
-            yaxis: { title: "Precio × peso" },
+            yaxis: { title: "Contribución (p.p.)", ticksuffix: "%" },
             legend: { orientation: "h", y: 1.08, x: 0 }
         },
 
