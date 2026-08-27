@@ -350,7 +350,7 @@
   <!-- Gráfico final: Vol Mediana -->
   <div class="grid-full">
     <div class="card">
-      <div class="card-header"><span class="card-title">Vol Mediana</span></div>
+      <div class="card-header"><span class="card-title">Volumen Mediana</span></div>
       <div class="legend">
         <div class="legend-item"><div class="legend-dot" style="background:#185FA5;"></div>30 días</div>
         <div class="legend-item"><div class="legend-dot" style="background:#888780;"></div>60 días</div>
@@ -526,7 +526,7 @@ function renderCharts() {
       {label:'60 días', data:d.dis60, borderColor:'#888780', borderWidth:1.5, tension:0.25, fill:false, borderDash:[4,3]},
       {label:'180 días', data:d.dis180, borderColor:'#BA7517', borderWidth:1.5, tension:0.25, fill:false}
     ]},
-    options: optsBase(v => Number(v).toFixed(2))
+    options: optsBase(v => Number(v).toFixed(2) + '%')
   });
 
   charts.drawdown = new Chart(document.getElementById('drawdownChart'), {
@@ -841,9 +841,9 @@ function handleFile(evt) {
         te180.push(iTe180>=0 ? (num(r[iTe180])) : 0);
         slip30.push(iSlip30>=0 ? (num(r[iSlip30])) : 0);
         slip60.push(iSlip60>=0 ? (num(r[iSlip60])) : 0);
-        dis30.push(iDis30>=0 ? num(r[iDis30]) : null);
-        dis60.push(iDis60>=0 ? num(r[iDis60]) : null);
-        dis180.push(iDis180>=0 ? num(r[iDis180]) : null);
+        dis30.push(iDis30>=0 ? num(r[iDis30]) * 100 : null);
+        dis60.push(iDis60>=0 ? num(r[iDis60]) * 100 : null);
+        dis180.push(iDis180>=0 ? num(r[iDis180]) * 100 : null);
         volmed30.push(iVolMed30>=0 ? num(r[iVolMed30]) : null);
         volmed60.push(iVolMed60>=0 ? num(r[iVolMed60]) : null);
         volmed180.push(iVolMed180>=0 ? num(r[iVolMed180]) : null);
