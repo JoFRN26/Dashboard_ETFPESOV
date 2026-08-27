@@ -841,9 +841,12 @@ function handleFile(evt) {
         te180.push(iTe180>=0 ? (num(r[iTe180])) : 0);
         slip30.push(iSlip30>=0 ? (num(r[iSlip30])) : 0);
         slip60.push(iSlip60>=0 ? (num(r[iSlip60])) : 0);
-        dis30.push(iDis30>=0 ? num(r[iDis30]) * 100 : null);
-        dis60.push(iDis60>=0 ? num(r[iDis60]) * 100 : null);
-        dis180.push(iDis180>=0 ? num(r[iDis180]) * 100 : null);
+        const dis30Val = iDis30 >= 0 ? num(r[iDis30]) : null;
+        const dis60Val = iDis60 >= 0 ? num(r[iDis60]) : null;
+        const dis180Val = iDis180 >= 0 ? num(r[iDis180]) : null;
+        dis30.push(dis30Val !== null ? dis30Val * 100 : null);
+        dis60.push(dis60Val !== null ? dis60Val * 100 : null);
+        dis180.push(dis180Val !== null ? dis180Val * 100 : null);
         volmed30.push(iVolMed30>=0 ? num(r[iVolMed30]) : null);
         volmed60.push(iVolMed60>=0 ? num(r[iVolMed60]) : null);
         volmed180.push(iVolMed180>=0 ? num(r[iVolMed180]) : null);
