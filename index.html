@@ -488,7 +488,7 @@ tr:hover td {
         <div class="panel">
 
             <div class="panel-title">
-                Curva soberana por duración — VALMER
+                Curva soberana por duración — VALMER vs ETFPESOV y Benchmark
             </div>
 
             <div
@@ -498,9 +498,9 @@ tr:hover td {
 
             <div class="chart-note">
 
-                X: Duración VALMER ·
-                Y: YTM VALMER ·
-                Solo utiliza información de VALMER.
+                X: Duración ·
+                Y: YTM ·
+                La curva de bonos utiliza VALMER; ETFPESOV y Benchmark muestran sus métricas agregadas.
 
             </div>
 
@@ -1806,7 +1806,7 @@ function renderCurve(data) {
 
 
 /* =========================================================
-   CURVA SOBERANA POR DURACIÓN — SOLO VALMER
+   CURVA SOBERANA POR DURACIÓN — VALMER + ETFPESOV + BENCHMARK
 ========================================================= */
 
 function renderDurationCurve(data) {
@@ -1893,6 +1893,128 @@ function renderDurationCurve(data) {
     }
 
 
+    /*
+     * ETFPESOV — punto agregado
+     */
+
+    const fondoRow =
+        data.find(
+            row =>
+                row.DuracionETF !== null &&
+                row.YtmETF !== null
+        );
+
+
+    if (fondoRow) {
+
+        traces.push({
+
+            x: [
+                fondoRow.DuracionETF
+            ],
+
+            y: [
+                fondoRow.YtmETF
+            ],
+
+            mode:
+                "markers",
+
+            name:
+                "ETFPESOV",
+
+            marker: {
+                size: 15,
+                symbol: "diamond",
+                line: {
+                    width: 1.5
+                }
+            },
+
+            customdata: [[
+                fondoRow.VencimientoETF,
+                fondoRow.DuracionETF,
+                fondoRow.YtmETF
+            ]],
+
+            hovertemplate:
+
+                "<b>ETFPESOV</b>" +
+
+                "<br>Vencimiento: %{customdata[0]}" +
+
+                "<br>Duración: %{customdata[1]:.3f}" +
+
+                "<br>YTM: %{customdata[2]:.3f}%" +
+
+                "<extra></extra>"
+
+        });
+
+    }
+
+
+    /*
+     * BENCHMARK — punto agregado
+     */
+
+    const benchmarkRow =
+        data.find(
+            row =>
+                row.DuracionBenchmark !== null &&
+                row.YtmBenchmark !== null
+        );
+
+
+    if (benchmarkRow) {
+
+        traces.push({
+
+            x: [
+                benchmarkRow.DuracionBenchmark
+            ],
+
+            y: [
+                benchmarkRow.YtmBenchmark
+            ],
+
+            mode:
+                "markers",
+
+            name:
+                "Benchmark",
+
+            marker: {
+                size: 15,
+                symbol: "square",
+                line: {
+                    width: 1.5
+                }
+            },
+
+            customdata: [[
+                benchmarkRow.VencimientoBenchmark,
+                benchmarkRow.DuracionBenchmark,
+                benchmarkRow.YtmBenchmark
+            ]],
+
+            hovertemplate:
+
+                "<b>Benchmark</b>" +
+
+                "<br>Vencimiento: %{customdata[0]}" +
+
+                "<br>Duración: %{customdata[1]:.3f}" +
+
+                "<br>YTM: %{customdata[2]:.3f}%" +
+
+                "<extra></extra>"
+
+        });
+
+    }
+
+
     Plotly.react(
 
         "durationCurveChart",
@@ -1906,7 +2028,7 @@ function renderDurationCurve(data) {
             xaxis: {
 
                 title:
-                    "Duración VALMER",
+                    "Duración",
 
                 gridcolor:
                     "#eef0f2"
@@ -1916,7 +2038,7 @@ function renderDurationCurve(data) {
             yaxis: {
 
                 title:
-                    "YTM VALMER (%)",
+                    "YTM (%)",
 
                 ticksuffix:
                     "%",
