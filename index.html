@@ -476,7 +476,7 @@ tr:hover td {
 
                 X: Vencimiento ·
                 Y: YTM ·
-                Cada punto representa un bono.
+                Cada punto representa un bono; ETFPESOV y Benchmark muestran sus métricas agregadas.
 
             </div>
 
@@ -596,7 +596,13 @@ const REQUIRED_COLUMNS = [
     "Diferencia de Pesos",
     "Precios",
     "Precio * Peso Benchmark",
-    "Precio * Peso ETFPESOV"
+    "Precio * Peso ETFPESOV",
+    "Vencimiento ETFPESOV",
+    "Duración ETFPESOV",
+    "YTM ETFPESOV",
+    "Vencimiento Benchmark",
+    "Duración Benchmark",
+    "YTM Benchmark"
 
 ];
 
@@ -663,7 +669,25 @@ const aliases = {
         "Precio * Peso Benchmark",
 
     "precio * peso etfpesov":
-        "Precio * Peso ETFPESOV"
+        "Precio * Peso ETFPESOV",
+
+    "vencimiento etfpesov":
+        "Vencimiento ETFPESOV",
+
+    "duracion etfpesov":
+        "Duración ETFPESOV",
+
+    "ytm etfpesov":
+        "YTM ETFPESOV",
+
+    "vencimiento benchmark":
+        "Vencimiento Benchmark",
+
+    "duracion benchmark":
+        "Duración Benchmark",
+
+    "ytm benchmark":
+        "YTM Benchmark"
 
 };
 
@@ -1092,6 +1116,26 @@ async function loadExcel() {
                             );
 
 
+                        const vencimientoETF =
+                            parseDate(
+                                row[
+                                    columnMap[
+                                        "Vencimiento ETFPESOV"
+                                    ]
+                                ]
+                            );
+
+
+                        const vencimientoBenchmark =
+                            parseDate(
+                                row[
+                                    columnMap[
+                                        "Vencimiento Benchmark"
+                                    ]
+                                ]
+                            );
+
+
                         return {
 
                             Fecha:
@@ -1203,6 +1247,52 @@ async function loadExcel() {
                                     row[
                                         columnMap[
                                             "Precio * Peso ETFPESOV"
+                                        ]
+                                    ]
+                                ),
+
+                            VencimientoETF:
+                                vencimientoETF
+                                    ? dateKey(vencimientoETF)
+                                    : null,
+
+                            DuracionETF:
+                                parseNumber(
+                                    row[
+                                        columnMap[
+                                            "Duración ETFPESOV"
+                                        ]
+                                    ]
+                                ),
+
+                            YtmETF:
+                                parseNumber(
+                                    row[
+                                        columnMap[
+                                            "YTM ETFPESOV"
+                                        ]
+                                    ]
+                                ),
+
+                            VencimientoBenchmark:
+                                vencimientoBenchmark
+                                    ? dateKey(vencimientoBenchmark)
+                                    : null,
+
+                            DuracionBenchmark:
+                                parseNumber(
+                                    row[
+                                        columnMap[
+                                            "Duración Benchmark"
+                                        ]
+                                    ]
+                                ),
+
+                            YtmBenchmark:
+                                parseNumber(
+                                    row[
+                                        columnMap[
+                                            "YTM Benchmark"
                                         ]
                                     ]
                                 )
@@ -1581,243 +1671,109 @@ const baseLayout = {
 
 function renderCurve(data) {
 
-    const valmer =
-        data.filter(
-            row =>
-                row.YtmValmer !== null
-        );
-
-
-    const mef =
-        data.filter(
-            row =>
-                row.YtmMef !== null
-        );
-
-
+    const valmer = data.filter(row => row.YtmValmer !== null);
+    const mef = data.filter(row => row.YtmMef !== null);
     const traces = [];
 
-
-    /*
-     * VALMER
-     */
-
     if (valmer.length) {
-
         traces.push({
-
-            x:
-                valmer.map(
-                    row =>
-                        row.Vencimiento
-                ),
-
-            y:
-                valmer.map(
-                    row =>
-                        row.YtmValmer
-                ),
-
-            mode:
-                "lines+markers",
-
-            name:
-                "YTM VALMER",
-
-            marker: {
-                size: 8
-            },
-
-            line: {
-                width: 2
-            },
-
-            customdata:
-                valmer.map(
-                    row => [
-
-                        row.Bono,
-                        row.Vencimiento,
-                        row.YtmValmer,
-                        row.YtmMef,
-                        row.DurValmer,
-                        row.DurMef,
-                        row.PesoETF,
-                        row.PesoBenchmark,
-                        row.Diferencia
-
-                    ]
-                ),
-
+            x: valmer.map(row => row.Vencimiento),
+            y: valmer.map(row => row.YtmValmer),
+            mode: "lines+markers",
+            name: "YTM VALMER",
+            marker: { size: 8 },
+            line: { width: 2 },
+            customdata: valmer.map(row => [
+                row.Bono, row.Vencimiento, row.YtmValmer, row.YtmMef,
+                row.DurValmer, row.DurMef, row.PesoETF, row.PesoBenchmark, row.Diferencia
+            ]),
             hovertemplate:
-
                 "<b>%{customdata[0]}</b>" +
-
                 "<br>Vencimiento: %{customdata[1]}" +
-
                 "<br>YTM VALMER: %{customdata[2]:.3f}%" +
-
-                "<br>YTM MEF: %{customdata[3]:.3f}%" +    
-
+                "<br>YTM MEF: %{customdata[3]:.3f}%" +
                 "<br>Duración VALMER: %{customdata[4]:.4f}" +
-
                 "<br>Duración MEF: %{customdata[5]:.4f}" +
-
                 "<br>Peso ETF: %{customdata[6]:.2%}" +
-
                 "<br>Peso Benchmark: %{customdata[7]:.2%}" +
-
                 "<br>Δ Peso: %{customdata[8]:.2%}" +
-
                 "<extra></extra>"
-
         });
-
     }
-
-
-    /*
-     * MEF
-     */
 
     if (mef.length) {
-
         traces.push({
-
-            x:
-                mef.map(
-                    row =>
-                        row.Vencimiento
-                ),
-
-            y:
-                mef.map(
-                    row =>
-                        row.YtmMef
-                ),
-
-            mode:
-                "lines+markers",
-
-            name:
-                "YTM MEF",
-
-            marker: {
-                size: 8
-            },
-
-            line: {
-                width: 2,
-                dash: "dash"
-            },
-
-            customdata:
-                mef.map(
-                    row => [
-
-                        row.Bono,
-                        row.Vencimiento,
-                        row.YtmValmer,
-                        row.YtmMef,
-                        row.DurValmer,
-                        row.DurMef,
-                        row.PesoETF,
-                        row.PesoBenchmark,
-                        row.Diferencia
-
-                    ]
-                ),
-
+            x: mef.map(row => row.Vencimiento),
+            y: mef.map(row => row.YtmMef),
+            mode: "lines+markers",
+            name: "YTM MEF",
+            marker: { size: 8 },
+            line: { width: 2, dash: "dash" },
+            customdata: mef.map(row => [
+                row.Bono, row.Vencimiento, row.YtmValmer, row.YtmMef,
+                row.DurValmer, row.DurMef, row.PesoETF, row.PesoBenchmark, row.Diferencia
+            ]),
             hovertemplate:
-
                 "<b>%{customdata[0]}</b>" +
-
                 "<br>Vencimiento: %{customdata[1]}" +
-
-                "<br>YTM VALMER: %{customdata[2]:.3%}" +
-
-                "<br>YTM MEF: %{customdata[3]:.3%}" +
-
+                "<br>YTM VALMER: %{customdata[2]:.3f}%" +
+                "<br>YTM MEF: %{customdata[3]:.3f}%" +
                 "<br>Duración VALMER: %{customdata[4]:.4f}" +
-
                 "<br>Duración MEF: %{customdata[5]:.4f}" +
-
                 "<br>Peso ETF: %{customdata[6]:.2%}" +
-
                 "<br>Peso Benchmark: %{customdata[7]:.2%}" +
-
                 "<br>Δ Peso: %{customdata[8]:.2%}" +
-
                 "<extra></extra>"
-
         });
-
     }
 
+    const fondoRow = data.find(row => row.VencimientoETF && row.YtmETF !== null);
+    if (fondoRow) {
+        traces.push({
+            x: [fondoRow.VencimientoETF],
+            y: [fondoRow.YtmETF],
+            mode: "markers",
+            name: "ETFPESOV",
+            marker: { size: 15, symbol: "diamond", line: { width: 1.5 } },
+            customdata: [[fondoRow.VencimientoETF, fondoRow.DuracionETF, fondoRow.YtmETF]],
+            hovertemplate:
+                "<b>ETFPESOV</b>" +
+                "<br>Vencimiento: %{customdata[0]}" +
+                "<br>Duración: %{customdata[1]:.3f}" +
+                "<br>YTM: %{customdata[2]:.3f}%" +
+                "<extra></extra>"
+        });
+    }
+
+    const benchmarkRow = data.find(row => row.VencimientoBenchmark && row.YtmBenchmark !== null);
+    if (benchmarkRow) {
+        traces.push({
+            x: [benchmarkRow.VencimientoBenchmark],
+            y: [benchmarkRow.YtmBenchmark],
+            mode: "markers",
+            name: "Benchmark",
+            marker: { size: 15, symbol: "square", line: { width: 1.5 } },
+            customdata: [[benchmarkRow.VencimientoBenchmark, benchmarkRow.DuracionBenchmark, benchmarkRow.YtmBenchmark]],
+            hovertemplate:
+                "<b>Benchmark</b>" +
+                "<br>Vencimiento: %{customdata[0]}" +
+                "<br>Duración: %{customdata[1]:.3f}" +
+                "<br>YTM: %{customdata[2]:.3f}%" +
+                "<extra></extra>"
+        });
+    }
 
     Plotly.react(
-
         "curveChart",
-
         traces,
-
         {
-
             ...baseLayout,
-
-            xaxis: {
-
-                title:
-                    "Vencimiento",
-
-                type:
-                    "date",
-
-                gridcolor:
-                    "#eef0f2"
-
-            },
-
-            yaxis: {
-
-                title:
-                    "YTM (%)",
-
-                ticksuffix:
-                    "%",
-
-                gridcolor:
-                    "#eef0f2"
-
-            },
-
-            legend: {
-
-                orientation:
-                    "h",
-
-                y:
-                    1.08,
-
-                x:
-                    0
-
-            }
-
+            xaxis: { title: "Vencimiento", type: "date", gridcolor: "#eef0f2" },
+            yaxis: { title: "YTM (%)", ticksuffix: "%", gridcolor: "#eef0f2" },
+            legend: { orientation: "h", y: 1.08, x: 0 }
         },
-
-        {
-
-            responsive:
-                true,
-
-            displaylogo:
-                false
-
-        }
-
+        { responsive: true, displaylogo: false }
     );
-
 }
 
 
