@@ -202,7 +202,7 @@
   <div class="grid-full">
     <div class="card">
       <div class="card-header">
-        <span class="card-title">Retornos — ETFPESOV vs Benchmark</span>
+        <span class="card-title">Retornos al <span id="returns-date">—</span> — ETFPESOV vs Benchmark</span>
       </div>
       <div class="returns-wrap">
         <table class="returns-table" aria-label="Retornos ETFPESOV vs Benchmark">
@@ -541,14 +541,14 @@ function historicalMean(arr) {
   return vals.reduce((a,b) => a + Number(b), 0) / vals.length;
 }
 
-function trailingReturn(values, dates, months) {
-  if (!Array.isArray(values) || !Array.isArray(dates) || !values.length || !dates.length) return null;
+function trailingReturnAtDate(values, dates, months, endDateKey) {
+  if (!Array.isArray(values) || !Array.isArray(dates) || !values.length || !dates.length || !endDateKey) return null;
 
-  // Última observación válida.
+  // Última observación válida en o antes de la fecha de corte mostrada.
   let lastIdx = -1;
   for (let i = Math.min(values.length, dates.length) - 1; i >= 0; i--) {
     const v = Number(values[i]);
-    if (dates[i] && Number.isFinite(v) && v > 0) {
+    if (dates[i] && dates[i] <= endDateKey && Number.isFinite(v) && v > 0) {
       lastIdx = i;
       break;
     }
@@ -557,19 +557,36 @@ function trailingReturn(values, dates, months) {
   if (lastIdx < 0) return null;
 
   const lastValue = Number(values[lastIdx]);
-  const lastDate = new Date(dates[lastIdx] + 'T00:00:00');
-  if (isNaN(lastDate)) return null;
+  const actualEndDate = new Date(dates[lastIdx] + 'T00:00:00');
+  if (isNaN(actualEndDate)) return null;
 
-  // Fecha objetivo: 1, 3, 6 o 12 meses atrás.
-  const targetDate = new Date(lastDate);
+  // Fecha objetivo: 1, 3, 6 o 12 meses antes de la última observación válida.
+  const targetDate = new Date(actualEndDate);
+  const originalDay = targetDate.getDate();
+
+  targetDate.setDate(1);
   targetDate.setMonth(targetDate.getMonth() - months);
 
-  // Usa la última observación disponible en o antes de la fecha objetivo.
+  // Conserva el día cuando sea posible; si no existe en ese mes,
+  // usa el último día del mes.
+  const lastDayTargetMonth = new Date(
+    targetDate.getFullYear(),
+    targetDate.getMonth() + 1,
+    0
+  ).getDate();
+
+  targetDate.setDate(Math.min(originalDay, lastDayTargetMonth));
+
+  const targetKey =
+    targetDate.getFullYear() + '-' +
+    String(targetDate.getMonth() + 1).padStart(2, '0') + '-' +
+    String(targetDate.getDate()).padStart(2, '0');
+
+  // Usa la última observación válida en o antes de la fecha objetivo.
   let baseIdx = -1;
   for (let i = lastIdx - 1; i >= 0; i--) {
-    const d = new Date(dates[i] + 'T00:00:00');
     const v = Number(values[i]);
-    if (!isNaN(d) && d <= targetDate && Number.isFinite(v) && v > 0) {
+    if (dates[i] && dates[i] <= targetKey && Number.isFinite(v) && v > 0) {
       baseIdx = i;
       break;
     }
@@ -594,7 +611,17 @@ function setReturnCell(id, value) {
   el.className = 'returns-value ' + (value > 0 ? 'pos' : value < 0 ? 'neg' : '');
 }
 
-function updateReturnsTable() {
+function formatDashboardDate(dateKey) {
+  if (!dateKey) return '—';
+  const parts = dateKey.split('-');
+  if (parts.length !== 3) return dateKey;
+  return `${parts[2]}/${parts[1]}/${parts[0]}`;
+}
+
+function updateReturnsTable(endDateKey) {
+  const titleDate = document.getElementById('returns-date');
+  if (titleDate) titleDate.textContent = formatDashboardDate(endDateKey);
+
   const horizons = [
     { months: 1, etf: 'ret-etf-1m', bench: 'ret-bench-1m' },
     { months: 3, etf: 'ret-etf-3m', bench: 'ret-bench-3m' },
@@ -603,8 +630,15 @@ function updateReturnsTable() {
   ];
 
   horizons.forEach(h => {
-    setReturnCell(h.etf, trailingReturn(DATA.nav, DATA.DATES, h.months));
-    setReturnCell(h.bench, trailingReturn(DATA.navb, DATA.DATES, h.months));
+    setReturnCell(
+      h.etf,
+      trailingReturnAtDate(DATA.nav, DATA.DATES, h.months, endDateKey)
+    );
+
+    setReturnCell(
+      h.bench,
+      trailingReturnAtDate(DATA.navb, DATA.DATES, h.months, endDateKey)
+    );
   });
 }
 
@@ -765,7 +799,13 @@ function renderCharts() {
   });
 
   updateKPIs(d);
-  updateReturnsTable();
+
+  const visibleEndDate =
+    d.DATES && d.DATES.length
+      ? d.DATES[d.DATES.length - 1]
+      : null;
+
+  updateReturnsTable(visibleEndDate);
 }
 
 function updateKPIs(d) {
