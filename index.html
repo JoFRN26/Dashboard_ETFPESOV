@@ -483,6 +483,30 @@ tr:hover td {
         </div>
 
 
+        <!-- CURVA SOBERANA POR DURACIÓN VALMER -->
+
+        <div class="panel">
+
+            <div class="panel-title">
+                Curva soberana por duración — VALMER
+            </div>
+
+            <div
+                id="durationCurveChart"
+                class="main-chart"
+            ></div>
+
+            <div class="chart-note">
+
+                X: Duración VALMER ·
+                Y: YTM VALMER ·
+                Solo utiliza información de VALMER.
+
+            </div>
+
+        </div>
+
+
         <!-- TWO CHARTS -->
 
         <div class="two-columns">
@@ -1607,6 +1631,10 @@ function renderDashboard() {
         data
     );
 
+    renderDurationCurve(
+        data
+    );
+
     renderDifference(
         data
     );
@@ -1774,6 +1802,157 @@ function renderCurve(data) {
         },
         { responsive: true, displaylogo: false }
     );
+}
+
+
+/* =========================================================
+   CURVA SOBERANA POR DURACIÓN — SOLO VALMER
+========================================================= */
+
+function renderDurationCurve(data) {
+
+    const valmer =
+        data
+            .filter(
+                row =>
+                    row.DurValmer !== null &&
+                    row.YtmValmer !== null
+            )
+            .sort(
+                (a,b) =>
+                    a.DurValmer - b.DurValmer
+            );
+
+
+    const traces = [];
+
+
+    if (valmer.length) {
+
+        traces.push({
+
+            x:
+                valmer.map(
+                    row =>
+                        row.DurValmer
+                ),
+
+            y:
+                valmer.map(
+                    row =>
+                        row.YtmValmer
+                ),
+
+            mode:
+                "lines+markers",
+
+            name:
+                "VALMER",
+
+            marker: {
+                size: 8
+            },
+
+            line: {
+                width: 2
+            },
+
+            customdata:
+                valmer.map(
+                    row => [
+                        row.Bono,
+                        row.Vencimiento,
+                        row.DurValmer,
+                        row.YtmValmer,
+                        row.PesoETF,
+                        row.PesoBenchmark,
+                        row.Diferencia
+                    ]
+                ),
+
+            hovertemplate:
+
+                "<b>%{customdata[0]}</b>" +
+
+                "<br>Vencimiento: %{customdata[1]}" +
+
+                "<br>Duración VALMER: %{customdata[2]:.4f}" +
+
+                "<br>YTM VALMER: %{customdata[3]:.3f}%" +
+
+                "<br>Peso ETF: %{customdata[4]:.2%}" +
+
+                "<br>Peso Benchmark: %{customdata[5]:.2%}" +
+
+                "<br>Δ Peso: %{customdata[6]:.2%}" +
+
+                "<extra></extra>"
+
+        });
+
+    }
+
+
+    Plotly.react(
+
+        "durationCurveChart",
+
+        traces,
+
+        {
+
+            ...baseLayout,
+
+            xaxis: {
+
+                title:
+                    "Duración VALMER",
+
+                gridcolor:
+                    "#eef0f2"
+
+            },
+
+            yaxis: {
+
+                title:
+                    "YTM VALMER (%)",
+
+                ticksuffix:
+                    "%",
+
+                gridcolor:
+                    "#eef0f2"
+
+            },
+
+            legend: {
+
+                orientation:
+                    "h",
+
+                y:
+                    1.08,
+
+                x:
+                    0
+
+            }
+
+        },
+
+        {
+
+            responsive:
+                true,
+
+            displaylogo:
+                false
+
+        }
+
+    );
+
 }
 
 
