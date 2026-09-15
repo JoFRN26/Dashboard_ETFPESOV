@@ -762,7 +762,7 @@ function renderCharts() {
   charts.drawdown = new Chart(document.getElementById('drawdownChart'), {
     type: 'line',
     data: { labels, datasets: [
-      {label:'Drawdown', data:d.drawdown, borderColor:'#185FA5', borderWidth:1.8, tension:0.2, fill:true, backgroundColor:'rgba(24,95,165,0.08)', pointRadius:0},
+      {label:'Drawdown', data:d.drawdown, borderColor:'#1F4E79', borderWidth:1.8, tension:0.2, fill:true, backgroundColor:'rgba(31,78,121,0.08)', pointRadius:0},
       {label:'Maximum Drawdown', data:d.maximumDrawdown, borderColor:'#BA7517', borderWidth:1.6, tension:0.15, fill:false, pointRadius:0, borderDash:[5,4]}
     ]},
     options: optsBase(v => v.toFixed(2)+'%')
