@@ -104,6 +104,8 @@
   .card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; }
   .card-title { font-size: 13px; font-weight: 500; color: var(--text); }
   .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .card-primary { border-top: 3px solid var(--blue); }
+  .card-primary .card-title { font-size: 14px; font-weight: 600; }
   .grid-full { margin-bottom: 1rem; }
 
   .grid-2 { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem; margin-bottom:1rem; }
@@ -207,7 +209,7 @@
 
   <!-- Cuadro comparativo de retornos -->
   <div class="grid-full">
-    <div class="card">
+    <div class="card card-primary">
       <div class="card-header">
         <span class="card-title">Retornos al <span id="returns-date">—</span> — ETFPESOV vs Benchmark</span>
       </div>
@@ -263,7 +265,7 @@
 
   <!-- Gráfico grande: retorno acumulado -->
   <div class="grid-full">
-    <div class="card">
+    <div class="card card-primary">
       <div class="card-header"><span class="card-title">Retorno acumulado — ETFPESOV vs Benchmark</span></div>
       <div class="legend">
         <div class="legend-item"><div class="legend-dot" style="background:#185FA5;"></div>ETFPESOV</div>
