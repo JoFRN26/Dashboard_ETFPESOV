@@ -164,18 +164,6 @@
     </div>
   </div>
 
-  <div class="upload-zone" id="dropzone" onclick="document.getElementById('fileInput').click()">
-    <i class="ti ti-upload"></i>
-    <div class="up-title">Arrastra tu Excel o haz clic para cargar</div>
-    <div class="up-hint">Columnas: Fecha · NAV · Patrimonio · Partícipes · Volumen · Operaciones · TE 30 días · TE 60 días · TE 180 días · Slippage 30 días · Slippage 60 días · Duración · YTM · Cupón · NAV_Benchmark · Dur_Benchmark · YTM_Benchmark · Cupón_Benchmark · ETFPESOV_Ac% · BENCHMARK_Ac% · Drawdown · Maximum Drawdown</div>
-    <button class="up-btn" onclick="event.stopPropagation()"><i class="ti ti-file"></i> Seleccionar archivo .xlsx / .csv</button>
-    <input type="file" class="file-input" id="fileInput" accept=".xlsx,.xls,.csv" onchange="handleFile(event)">
-    <div class="status">
-      <div class="dot"></div>
-      <span id="status-text">Cargando Data-ETFPESOV.xlsx...</span>
-    </div>
-  </div>
-
   <!-- Tarjetas ETF -->
   <div class="metric-section">
     <div class="sec-label etf-label">ETFPESOV</div>
