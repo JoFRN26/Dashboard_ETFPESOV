@@ -209,25 +209,31 @@
           <thead>
             <tr>
               <th>Portafolio</th>
+              <th>1 día</th>
               <th>1 mes</th>
               <th>3 meses</th>
               <th>6 meses</th>
+              <th>YTD</th>
               <th>1 año</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td class="returns-name">ETFPESOV</td>
+              <td id="ret-etf-1d">—</td>
               <td id="ret-etf-1m">—</td>
               <td id="ret-etf-3m">—</td>
               <td id="ret-etf-6m">—</td>
+              <td id="ret-etf-ytd">—</td>
               <td id="ret-etf-1y">—</td>
             </tr>
             <tr>
               <td class="returns-name">Benchmark</td>
+              <td id="ret-bench-1d">—</td>
               <td id="ret-bench-1m">—</td>
               <td id="ret-bench-3m">—</td>
               <td id="ret-bench-6m">—</td>
+              <td id="ret-bench-ytd">—</td>
               <td id="ret-bench-1y">—</td>
             </tr>
           </tbody>
@@ -597,6 +603,69 @@ function trailingReturnAtDate(values, dates, months, endDateKey) {
   return (lastValue / Number(values[baseIdx]) - 1) * 100;
 }
 
+function oneDayReturnAtDate(values, dates, endDateKey) {
+  if (!Array.isArray(values) || !Array.isArray(dates) || !values.length || !dates.length || !endDateKey) return null;
+
+  let lastIdx = -1;
+  for (let i = Math.min(values.length, dates.length) - 1; i >= 0; i--) {
+    const v = Number(values[i]);
+    if (dates[i] && dates[i] <= endDateKey && Number.isFinite(v) && v > 0) {
+      lastIdx = i;
+      break;
+    }
+  }
+  if (lastIdx < 1) return null;
+
+  let baseIdx = -1;
+  for (let i = lastIdx - 1; i >= 0; i--) {
+    const v = Number(values[i]);
+    if (Number.isFinite(v) && v > 0) { baseIdx = i; break; }
+  }
+  if (baseIdx < 0) return null;
+
+  return (Number(values[lastIdx]) / Number(values[baseIdx]) - 1) * 100;
+}
+
+function ytdReturnAtDate(values, dates, endDateKey) {
+  if (!Array.isArray(values) || !Array.isArray(dates) || !values.length || !dates.length || !endDateKey) return null;
+
+  let lastIdx = -1;
+  for (let i = Math.min(values.length, dates.length) - 1; i >= 0; i--) {
+    const v = Number(values[i]);
+    if (dates[i] && dates[i] <= endDateKey && Number.isFinite(v) && v > 0) {
+      lastIdx = i;
+      break;
+    }
+  }
+  if (lastIdx < 0) return null;
+
+  const year = dates[lastIdx].slice(0, 4);
+
+  // Última observación válida del año anterior (cierre de año).
+  let baseIdx = -1;
+  for (let i = lastIdx - 1; i >= 0; i--) {
+    const v = Number(values[i]);
+    if (dates[i] && dates[i].slice(0, 4) < year && Number.isFinite(v) && v > 0) {
+      baseIdx = i;
+      break;
+    }
+  }
+
+  // Si no hay datos del año anterior, usa la primera observación válida del año en curso.
+  if (baseIdx < 0) {
+    for (let i = 0; i <= lastIdx; i++) {
+      const v = Number(values[i]);
+      if (dates[i] && dates[i].slice(0, 4) === year && Number.isFinite(v) && v > 0) {
+        baseIdx = i;
+        break;
+      }
+    }
+  }
+  if (baseIdx < 0) return null;
+
+  return (Number(values[lastIdx]) / Number(values[baseIdx]) - 1) * 100;
+}
+ 
 function setReturnCell(id, value) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -622,6 +691,9 @@ function updateReturnsTable(endDateKey) {
   const titleDate = document.getElementById('returns-date');
   if (titleDate) titleDate.textContent = formatDashboardDate(endDateKey);
 
+  setReturnCell('ret-etf-1d', oneDayReturnAtDate(DATA.nav, DATA.DATES, endDateKey));
+  setReturnCell('ret-bench-1d', oneDayReturnAtDate(DATA.navb, DATA.DATES, endDateKey));
+
   const horizons = [
     { months: 1, etf: 'ret-etf-1m', bench: 'ret-bench-1m' },
     { months: 3, etf: 'ret-etf-3m', bench: 'ret-bench-3m' },
@@ -630,16 +702,12 @@ function updateReturnsTable(endDateKey) {
   ];
 
   horizons.forEach(h => {
-    setReturnCell(
-      h.etf,
-      trailingReturnAtDate(DATA.nav, DATA.DATES, h.months, endDateKey)
-    );
-
-    setReturnCell(
-      h.bench,
-      trailingReturnAtDate(DATA.navb, DATA.DATES, h.months, endDateKey)
-    );
+    setReturnCell(h.etf, trailingReturnAtDate(DATA.nav, DATA.DATES, h.months, endDateKey));
+    setReturnCell(h.bench, trailingReturnAtDate(DATA.navb, DATA.DATES, h.months, endDateKey));
   });
+
+  setReturnCell('ret-etf-ytd', ytdReturnAtDate(DATA.nav, DATA.DATES, endDateKey));
+  setReturnCell('ret-bench-ytd', ytdReturnAtDate(DATA.navb, DATA.DATES, endDateKey));
 }
 
 function renderCharts() {
