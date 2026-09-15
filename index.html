@@ -2472,7 +2472,7 @@ function renderComparison(data) {
             ...baseLayout,
             barmode: "group",
             bargap: 0.25,
-            margin: { l: 60, r: 20, t: 5, b: 80 },
+            margin: { l: 60, r: 20, t: 10, b: 150 },
             xaxis: { tickangle: -45 },
             yaxis: {
                 title: "Contribución (p.p.)",
@@ -2480,7 +2480,7 @@ function renderComparison(data) {
                 gridcolor: COLORS.grid,
                 zerolinecolor: "#d6d5d0"
             },
-            legend: { orientation: "h", y: 1.08, x: 0 }
+            legend: { orientation: "h", y: -0.38, yanchor: "top", x: 0 }
         },
 
         { responsive: true, displaylogo: false }
