@@ -6,7 +6,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>ETFPESOV — Bond Composition & Benchmark</title>
+<title>ETFPESOV — Bond Composition &amp; Benchmark</title>
+
+<!-- Tipografías -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
 <!-- Excel -->
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -17,14 +22,31 @@
 <style>
 
 :root {
-    --background: #f4f6f8;
+    --background: #f8f8f6;
     --card: #ffffff;
-    --text: #17202a;
-    --muted: #6b7280;
-    --border: #e5e7eb;
-    --primary: #1f4e79;
-    --green: #16845b;
-    --red: #c0392b;
+    --surface2: #f2f1ee;
+
+    --text: #1a1a18;
+    --muted: #6b6b67;
+    --hint: #9a9a96;
+
+    --border: rgba(0,0,0,0.10);
+    --border-md: rgba(0,0,0,0.18);
+
+    --primary: #1F4E79;
+    --primary-bg: #e8eef3;
+    --primary-text: #163449;
+
+    --bench: #6b6b67;
+    --bench-soft: #C0BFB8;
+    --primary-soft: #7FA6C9;
+
+    --green: #0F6E56;
+    --red: #A32D2D;
+    --amber: #BA7517;
+
+    --radius: 8px;
+    --radius-lg: 12px;
 }
 
 * {
@@ -35,13 +57,14 @@ body {
     margin: 0;
     background: var(--background);
     color: var(--text);
-    font-family: "Segoe UI", Arial, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    font-size: 15px;
 }
 
 .container {
     max-width: 1500px;
     margin: auto;
-    padding: 28px;
+    padding: 2rem 1.5rem;
 }
 
 
@@ -53,19 +76,23 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    margin-bottom: 18px;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 0.5px solid var(--border);
 }
 
 .title {
-    font-size: 28px;
-    font-weight: 700;
+    font-size: 20px;
+    font-weight: 600;
     margin: 0;
+    letter-spacing: -0.01em;
 }
 
 .subtitle {
     color: var(--muted);
     font-size: 13px;
-    margin-top: 5px;
+    margin-top: 4px;
 }
 
 
@@ -74,9 +101,21 @@ body {
 ========================= */
 
 .status {
+    display: flex;
+    align-items: center;
+    gap: 7px;
     color: var(--muted);
     font-size: 12px;
-    margin-bottom: 15px;
+    margin-bottom: 1.25rem;
+}
+
+.status::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    flex-shrink: 0;
 }
 
 
@@ -87,23 +126,35 @@ body {
 .date-bar {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
+    gap: 10px;
+    margin-bottom: 1.25rem;
 }
 
 .date-label {
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 12.5px;
+    font-weight: 600;
     color: var(--muted);
-    letter-spacing: 0.7px;
 }
 
 select {
-    border: 1px solid var(--border);
-    background: white;
-    border-radius: 8px;
-    padding: 9px 13px;
+    font-family: inherit;
+    border: 0.5px solid var(--border-md);
+    background: var(--card);
+    color: var(--text);
+    border-radius: var(--radius);
+    padding: 8px 12px;
     font-size: 13px;
+    cursor: pointer;
+    transition: border-color 0.12s;
+}
+
+select:hover {
+    border-color: var(--primary);
+}
+
+select:focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 1px;
 }
 
 
@@ -114,35 +165,52 @@ select {
 .cards {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 14px;
-    margin-bottom: 16px;
+    gap: 10px;
+    margin-bottom: 1.25rem;
 }
 
 .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 18px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.035);
+    background: var(--surface2);
+    border-radius: var(--radius);
+    padding: 14px 16px;
 }
 
 .card-label {
     color: var(--muted);
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.7px;
+    font-size: 12px;
+    margin-bottom: 5px;
 }
 
 .card-value {
-    font-size: 24px;
-    font-weight: 700;
-    margin-top: 8px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 22px;
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
 }
 
 .card-note {
-    color: var(--muted);
-    font-size: 10px;
-    margin-top: 5px;
+    color: var(--hint);
+    font-size: 11px;
+    margin-top: 4px;
+}
+
+/* Tarjeta principal — el dato que se lee primero */
+
+.card.card-hero {
+    background: var(--primary-bg);
+}
+
+.card.card-hero .card-label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--primary-text);
+}
+
+.card.card-hero .card-value {
+    font-size: 32px;
+    font-weight: 600;
 }
 
 
@@ -151,18 +219,29 @@ select {
 ========================= */
 
 .panel {
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 15px;
-    margin-bottom: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.035);
+    background: var(--card);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1rem 1.25rem;
+    margin-bottom: 1rem;
 }
 
 .panel-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    margin: 0 0 12px;
+}
+
+/* Panel destacado — la vista principal del dashboard */
+
+.panel-primary {
+    border-top: 3px solid var(--primary);
+}
+
+.panel-primary .panel-title {
     font-size: 14px;
-    font-weight: 700;
-    margin: 3px 4px 12px;
+    font-weight: 600;
 }
 
 
@@ -181,13 +260,14 @@ select {
 .two-columns {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 16px;
+    gap: 1rem;
 }
 
 .chart-note {
-    color: var(--muted);
+    color: var(--hint);
     font-size: 11px;
-    margin: 7px 4px 0;
+    margin: 10px 2px 0;
+    line-height: 1.5;
 }
 
 
@@ -203,56 +283,64 @@ select {
 table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 12px;
+    font-size: 13px;
     white-space: nowrap;
 }
 
 th {
     position: sticky;
     top: 0;
-    background: #f8fafc;
-    color: #4b5563;
-    text-align: center;
-    padding: 10px;
-    border-bottom: 1px solid var(--border);
+    background: var(--card);
+    color: var(--muted);
+    font-size: 11px;
+    font-weight: 500;
+    text-align: right;
+    padding: 11px 14px;
+    border-bottom: 0.5px solid var(--border-md);
     z-index: 1;
 }
 
-td {
-    padding: 9px 10px;
-    border-bottom: 1px solid #eef0f2;
-    text-align: center;
+th:first-child,
+th:nth-child(2) {
+    text-align: left;
 }
 
-tr:hover td {
-    background: #fafafa;
+td {
+    padding: 10px 14px;
+    border-bottom: 0.5px solid var(--border);
+    text-align: left;
+    color: var(--text);
+}
+
+tbody tr:hover td {
+    background: var(--surface2);
 }
 
 .numeric {
-    text-align: center;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    text-align: right;
     font-variant-numeric: tabular-nums;
 }
 
 .positive {
     color: var(--green);
-    font-weight: 600;
 }
 
 .negative {
     color: var(--red);
-    font-weight: 600;
 }
 
 /* Fila Cash */
 
 .cash-row td {
-    background: #f8fafc;
-    border-top: 2px solid var(--border);
+    background: var(--surface2);
+    border-top: 1.5px solid var(--border-md);
+    border-bottom: none;
     font-weight: 600;
 }
 
 .cash-row:hover td {
-    background: #f3f6f9;
+    background: var(--surface2);
 }
 
 
@@ -262,11 +350,20 @@ tr:hover td {
 
 .empty {
     text-align: center;
-    padding: 70px;
+    padding: 70px 24px;
     color: var(--muted);
-    background: white;
-    border: 1px solid var(--border);
-    border-radius: 12px;
+    font-size: 13px;
+    background: var(--card);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+}
+
+.empty strong {
+    display: block;
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 6px;
 }
 
 
@@ -287,14 +384,14 @@ tr:hover td {
     .header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 15px;
+        gap: 12px;
     }
 }
 
 @media (max-width: 520px) {
 
     .container {
-        padding: 14px;
+        padding: 1rem;
     }
 
     .cards {
@@ -303,6 +400,10 @@ tr:hover td {
 
     .card-value {
         font-size: 19px;
+    }
+
+    .card.card-hero .card-value {
+        font-size: 26px;
     }
 }
 
@@ -323,11 +424,11 @@ tr:hover td {
         <div>
 
             <h1 class="title">
-                ETFPESOV
+                ETFPESOV — Composición y benchmark
             </h1>
 
             <div class="subtitle">
-                Bond Composition & Benchmark
+                Detalle de bonos, curva soberana y diferencias de peso frente al benchmark
             </div>
 
         </div>
@@ -347,10 +448,8 @@ tr:hover td {
     <div id="emptyScreen" class="empty">
 
         <strong>
-            Cargando dashboard...
+            Cargando dashboard
         </strong>
-
-        <br><br>
 
         Los datos se están cargando automáticamente.
 
@@ -366,9 +465,9 @@ tr:hover td {
 
         <div class="date-bar">
 
-            <div class="date-label">
-                FECHA
-            </div>
+            <label class="date-label" for="dateSelector">
+                Fecha
+            </label>
 
             <select id="dateSelector"></select>
 
@@ -378,6 +477,46 @@ tr:hover td {
         <!-- KPI CARDS -->
 
         <div class="cards">
+
+
+            <!-- PESO ETF -->
+
+            <div class="card card-hero">
+
+                <div class="card-label">
+                    Peso ETFPESOV
+                </div>
+
+                <div
+                    id="kpiETF"
+                    class="card-value"
+                >
+                    —
+                </div>
+
+                <div class="card-note">
+                    invertido en bonos
+                </div>
+
+            </div>
+
+
+            <!-- PESO BENCHMARK -->
+
+            <div class="card">
+
+                <div class="card-label">
+                    Peso Benchmark
+                </div>
+
+                <div
+                    id="kpiBenchmark"
+                    class="card-value"
+                >
+                    —
+                </div>
+
+            </div>
 
 
             <!-- NÚMERO DE BONOS -->
@@ -397,42 +536,6 @@ tr:hover td {
 
                 <div class="card-note">
                     ETFPESOV / Total base
-                </div>
-
-            </div>
-
-
-            <!-- PESO ETF -->
-
-            <div class="card">
-
-                <div class="card-label">
-                    Peso ETFPESOV
-                </div>
-
-                <div
-                    id="kpiETF"
-                    class="card-value"
-                >
-                    —
-                </div>
-
-            </div>
-
-
-            <!-- PESO BENCHMARK -->
-
-            <div class="card">
-
-                <div class="card-label">
-                    Peso Benchmark
-                </div>
-
-                <div
-                    id="kpiBenchmark"
-                    class="card-value"
-                >
-                    —
                 </div>
 
             </div>
@@ -461,7 +564,7 @@ tr:hover td {
 
         <!-- CURVA SOBERANA -->
 
-        <div class="panel">
+        <div class="panel panel-primary">
 
             <div class="panel-title">
                 Curva soberana
@@ -629,6 +732,25 @@ const REQUIRED_COLUMNS = [
     "YTM Benchmark"
 
 ];
+
+
+/* =========================================================
+   PALETA — misma familia de colores del dashboard de gestión
+========================================================= */
+
+const COLORS = {
+
+    primary:     "#1F4E79",
+    primarySoft: "#7FA6C9",
+    bench:       "#6b6b67",
+    benchSoft:   "#C0BFB8",
+    green:       "#0F6E56",
+    red:         "#A32D2D",
+    amber:       "#BA7517",
+    grid:        "#e8e7e3",
+    axis:        "#6b6b67"
+
+};
 
 
 /* =========================================================
@@ -1677,16 +1799,39 @@ const baseLayout = {
     plot_bgcolor:
         "white",
 
+    hoverlabel: {
+
+        bgcolor:
+            "white",
+
+        bordercolor:
+            "#e5e4e0",
+
+        font: {
+
+            family:
+                "Inter, system-ui, sans-serif",
+
+            size:
+                11,
+
+            color:
+                "#1a1a18"
+
+        }
+
+    },
+
     font: {
 
         family:
-            "Segoe UI, Arial, sans-serif",
+            "Inter, system-ui, sans-serif",
 
         size:
             11,
 
         color:
-            "#374151"
+            COLORS.axis
 
     }
 
@@ -1709,8 +1854,8 @@ function renderCurve(data) {
             y: valmer.map(row => row.YtmValmer),
             mode: "lines+markers",
             name: "YTM VALMER",
-            marker: { size: 8 },
-            line: { width: 2 },
+            marker: { size: 7, color: COLORS.primarySoft },
+            line: { width: 2, color: COLORS.primarySoft },
             customdata: valmer.map(row => [
                 row.Bono, row.Vencimiento, row.YtmValmer, row.YtmMef,
                 row.DurValmer, row.DurMef, row.PesoETF, row.PesoBenchmark, row.Diferencia
@@ -1735,8 +1880,8 @@ function renderCurve(data) {
             y: mef.map(row => row.YtmMef),
             mode: "lines+markers",
             name: "YTM MEF",
-            marker: { size: 8 },
-            line: { width: 2, dash: "dash" },
+            marker: { size: 7, color: COLORS.benchSoft },
+            line: { width: 2, dash: "dash", color: COLORS.benchSoft },
             customdata: mef.map(row => [
                 row.Bono, row.Vencimiento, row.YtmValmer, row.YtmMef,
                 row.DurValmer, row.DurMef, row.PesoETF, row.PesoBenchmark, row.Diferencia
@@ -1762,7 +1907,12 @@ function renderCurve(data) {
             y: [fondoRow.YtmETF],
             mode: "markers",
             name: "ETFPESOV",
-            marker: { size: 15, symbol: "diamond", line: { width: 1.5 } },
+            marker: {
+                size: 16,
+                symbol: "diamond",
+                color: COLORS.primary,
+                line: { width: 1.5, color: "white" }
+            },
             customdata: [[fondoRow.VencimientoETF, fondoRow.DuracionETF, fondoRow.YtmETF]],
             hovertemplate:
                 "<b>ETFPESOV</b>" +
@@ -1780,7 +1930,12 @@ function renderCurve(data) {
             y: [benchmarkRow.YtmBenchmark],
             mode: "markers",
             name: "Benchmark",
-            marker: { size: 15, symbol: "square", line: { width: 1.5 } },
+            marker: {
+                size: 14,
+                symbol: "square",
+                color: COLORS.bench,
+                line: { width: 1.5, color: "white" }
+            },
             customdata: [[benchmarkRow.VencimientoBenchmark, benchmarkRow.DuracionBenchmark, benchmarkRow.YtmBenchmark]],
             hovertemplate:
                 "<b>Benchmark</b>" +
@@ -1796,8 +1951,8 @@ function renderCurve(data) {
         traces,
         {
             ...baseLayout,
-            xaxis: { title: "Vencimiento", type: "date", gridcolor: "#eef0f2" },
-            yaxis: { title: "YTM (%)", ticksuffix: "%", gridcolor: "#eef0f2" },
+            xaxis: { title: "Vencimiento", type: "date", gridcolor: COLORS.grid, zeroline: false },
+            yaxis: { title: "YTM (%)", ticksuffix: "%", gridcolor: COLORS.grid, zeroline: false },
             legend: { orientation: "h", y: 1.08, x: 0 }
         },
         { responsive: true, displaylogo: false }
@@ -1850,11 +2005,13 @@ function renderDurationCurve(data) {
                 "VALMER",
 
             marker: {
-                size: 8
+                size: 7,
+                color: COLORS.primarySoft
             },
 
             line: {
-                width: 2
+                width: 2,
+                color: COLORS.primarySoft
             },
 
             customdata:
@@ -1924,10 +2081,12 @@ function renderDurationCurve(data) {
                 "ETFPESOV",
 
             marker: {
-                size: 15,
+                size: 16,
                 symbol: "diamond",
+                color: COLORS.primary,
                 line: {
-                    width: 1.5
+                    width: 1.5,
+                    color: "white"
                 }
             },
 
@@ -1985,10 +2144,12 @@ function renderDurationCurve(data) {
                 "Benchmark",
 
             marker: {
-                size: 15,
+                size: 14,
                 symbol: "square",
+                color: COLORS.bench,
                 line: {
-                    width: 1.5
+                    width: 1.5,
+                    color: "white"
                 }
             },
 
@@ -2031,7 +2192,10 @@ function renderDurationCurve(data) {
                     "Duración",
 
                 gridcolor:
-                    "#eef0f2"
+                    COLORS.grid,
+
+                zeroline:
+                    false
 
             },
 
@@ -2044,7 +2208,10 @@ function renderDurationCurve(data) {
                     "%",
 
                 gridcolor:
-                    "#eef0f2"
+                    COLORS.grid,
+
+                zeroline:
+                    false
 
             },
 
@@ -2124,6 +2291,23 @@ function renderDifference(data) {
             orientation:
                 "h",
 
+            /*
+             * Sobreponderado en verde, subponderado en rojo,
+             * igual que la columna Diferencia de la tabla.
+             */
+
+            marker: {
+
+                color:
+                    sorted.map(
+                        row =>
+                            (row.Diferencia ?? 0) >= 0
+                                ? COLORS.green
+                                : COLORS.red
+                    )
+
+            },
+
             text:
                 sorted.map(
                     row =>
@@ -2134,6 +2318,16 @@ function renderDifference(data) {
 
             textposition:
                 "outside",
+
+            textfont: {
+
+                size:
+                    10,
+
+                color:
+                    COLORS.axis
+
+            },
 
             hovertemplate:
 
@@ -2167,7 +2361,13 @@ function renderDifference(data) {
                     "%",
 
                 gridcolor:
-                    "#eef0f2"
+                    COLORS.grid,
+
+                zerolinecolor:
+                    "#d6d5d0",
+
+                zerolinewidth:
+                    1
 
             },
 
@@ -2218,6 +2418,8 @@ function renderComparison(data) {
 
         type: "bar",
 
+        marker: { color: COLORS.primary },
+
         customdata: sorted.map(row => [
             row.Precio,
             row.PesoETF,
@@ -2243,6 +2445,8 @@ function renderComparison(data) {
 
         type: "bar",
 
+        marker: { color: COLORS.benchSoft },
+
         customdata: sorted.map(row => [
             row.Precio,
             row.PesoBenchmark,
@@ -2267,9 +2471,15 @@ function renderComparison(data) {
         {
             ...baseLayout,
             barmode: "group",
+            bargap: 0.25,
             margin: { l: 60, r: 20, t: 5, b: 80 },
             xaxis: { tickangle: -45 },
-            yaxis: { title: "Contribución (p.p.)", ticksuffix: "%" },
+            yaxis: {
+                title: "Contribución (p.p.)",
+                ticksuffix: "%",
+                gridcolor: COLORS.grid,
+                zerolinecolor: "#d6d5d0"
+            },
             legend: { orientation: "h", y: 1.08, x: 0 }
         },
 
