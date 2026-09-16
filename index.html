@@ -609,7 +609,30 @@ tbody tr:hover td {
 
         </div>
 
+                <!-- CURVA SOBERANA POR DURACIÓN MEF -->
 
+        <div class="panel">
+
+            <div class="panel-title">
+                Curva soberana por duración — MEF vs ETFPESOV y Benchmark
+            </div>
+
+            <div
+                id="durationCurveMefChart"
+                class="main-chart"
+            ></div>
+
+            <div class="chart-note">
+
+                X: Duración ·
+                Y: YTM ·
+                La curva de bonos utiliza MEF; ETFPESOV y Benchmark muestran sus métricas agregadas.
+
+            </div>
+
+        </div>
+
+        
         <!-- TWO CHARTS -->
 
         <div class="two-columns">
@@ -1757,6 +1780,10 @@ function renderDashboard() {
         data
     );
 
+    renderDurationCurveMef(
+        data
+    );
+
     renderDifference(
         data
     );
@@ -2244,6 +2271,290 @@ function renderDurationCurve(data) {
 
 }
 
+/* =========================================================
+   CURVA SOBERANA POR DURACIÓN — MEF + ETFPESOV + BENCHMARK
+========================================================= */
+
+function renderDurationCurveMef(data) {
+
+    const mef =
+        data
+            .filter(
+                row =>
+                    row.DurMef !== null &&
+                    row.YtmMef !== null
+            )
+            .sort(
+                (a,b) =>
+                    a.DurMef - b.DurMef
+            );
+
+
+    const traces = [];
+
+
+    if (mef.length) {
+
+        traces.push({
+
+            x:
+                mef.map(
+                    row =>
+                        row.DurMef
+                ),
+
+            y:
+                mef.map(
+                    row =>
+                        row.YtmMef
+                ),
+
+            mode:
+                "lines+markers",
+
+            name:
+                "MEF",
+
+            marker: {
+                size: 7,
+                color: COLORS.benchSoft
+            },
+
+            line: {
+                width: 2,
+                dash: "dash",
+                color: COLORS.benchSoft
+            },
+
+            customdata:
+                mef.map(
+                    row => [
+                        row.Bono,
+                        row.Vencimiento,
+                        row.DurMef,
+                        row.YtmMef,
+                        row.PesoETF,
+                        row.PesoBenchmark,
+                        row.Diferencia
+                    ]
+                ),
+
+            hovertemplate:
+
+                "<b>%{customdata[0]}</b>" +
+
+                "<br>Vencimiento: %{customdata[1]}" +
+
+                "<br>Duración MEF: %{customdata[2]:.4f}" +
+
+                "<br>YTM MEF: %{customdata[3]:.3f}%" +
+
+                "<br>Peso ETF: %{customdata[4]:.2%}" +
+
+                "<br>Peso Benchmark: %{customdata[5]:.2%}" +
+
+                "<br>Δ Peso: %{customdata[6]:.2%}" +
+
+                "<extra></extra>"
+
+        });
+
+    }
+
+
+    /*
+     * ETFPESOV — punto agregado
+     */
+
+    const fondoRow =
+        data.find(
+            row =>
+                row.DuracionETF !== null &&
+                row.YtmETF !== null
+        );
+
+
+    if (fondoRow) {
+
+        traces.push({
+
+            x: [
+                fondoRow.DuracionETF
+            ],
+
+            y: [
+                fondoRow.YtmETF
+            ],
+
+            mode:
+                "markers",
+
+            name:
+                "ETFPESOV",
+
+            marker: {
+                size: 16,
+                symbol: "diamond",
+                color: COLORS.primary,
+                line: {
+                    width: 1.5,
+                    color: "white"
+                }
+            },
+
+            customdata: [[
+                fondoRow.VencimientoETF,
+                fondoRow.DuracionETF,
+                fondoRow.YtmETF
+            ]],
+
+            hovertemplate:
+
+                "<b>ETFPESOV</b>" +
+
+                "<br>Vencimiento: %{customdata[0]}" +
+
+                "<br>Duración: %{customdata[1]:.3f}" +
+
+                "<br>YTM: %{customdata[2]:.3f}%" +
+
+                "<extra></extra>"
+
+        });
+
+    }
+
+
+    /*
+     * BENCHMARK — punto agregado
+     */
+
+    const benchmarkRow =
+        data.find(
+            row =>
+                row.DuracionBenchmark !== null &&
+                row.YtmBenchmark !== null
+        );
+
+
+    if (benchmarkRow) {
+
+        traces.push({
+
+            x: [
+                benchmarkRow.DuracionBenchmark
+            ],
+
+            y: [
+                benchmarkRow.YtmBenchmark
+            ],
+
+            mode:
+                "markers",
+
+            name:
+                "Benchmark",
+
+            marker: {
+                size: 14,
+                symbol: "square",
+                color: COLORS.bench,
+                line: {
+                    width: 1.5,
+                    color: "white"
+                }
+            },
+
+            customdata: [[
+                benchmarkRow.VencimientoBenchmark,
+                benchmarkRow.DuracionBenchmark,
+                benchmarkRow.YtmBenchmark
+            ]],
+
+            hovertemplate:
+
+                "<b>Benchmark</b>" +
+
+                "<br>Vencimiento: %{customdata[0]}" +
+
+                "<br>Duración: %{customdata[1]:.3f}" +
+
+                "<br>YTM: %{customdata[2]:.3f}%" +
+
+                "<extra></extra>"
+
+        });
+
+    }
+
+
+    Plotly.react(
+
+        "durationCurveMefChart",
+
+        traces,
+
+        {
+
+            ...baseLayout,
+
+            xaxis: {
+
+                title:
+                    "Duración",
+
+                gridcolor:
+                    COLORS.grid,
+
+                zeroline:
+                    false
+
+            },
+
+            yaxis: {
+
+                title:
+                    "YTM (%)",
+
+                ticksuffix:
+                    "%",
+
+                gridcolor:
+                    COLORS.grid,
+
+                zeroline:
+                    false
+
+            },
+
+            legend: {
+
+                orientation:
+                    "h",
+
+                y:
+                    1.08,
+
+                x:
+                    0
+
+            }
+
+        },
+
+        {
+
+            responsive:
+                true,
+
+            displaylogo:
+                false
+
+        }
+
+    );
+
+}
 
 /* =========================================================
    DIFERENCIA DE PESOS
