@@ -355,6 +355,28 @@
 
   </div>
 
+  <!-- Diferencias: Duración y YTM (ETFPESOV - Benchmark) -->
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-header"><span class="card-title">Duración: ETFPESOV − Benchmark</span></div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#1F4E79;"></div>Diferencia</div>
+      </div>
+      <div style="position:relative;width:100%;height:180px;">
+        <canvas id="durDiffChart" role="img" aria-label="Diferencia de duración entre ETFPESOV y Benchmark"></canvas>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header"><span class="card-title">YTM: ETFPESOV − Benchmark</span></div>
+      <div class="legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#1F4E79;"></div>Diferencia</div>
+      </div>
+      <div style="position:relative;width:100%;height:180px;">
+        <canvas id="ytmDiffChart" role="img" aria-label="Diferencia de YTM entre ETFPESOV y Benchmark"></canvas>
+      </div>
+    </div>
+  </div>
+ 
   <!-- Segunda fila: Patrimonio/Partícipes y Volumen/Operaciones -->
   <div class="grid-2">
     <div class="card">
@@ -795,6 +817,26 @@ function renderCharts() {
     options: optsBase(v => v.toFixed(2)+'a')
   });
 
+  // Diferencias: Duración y YTM (ETFPESOV - Benchmark)
+  const durDiff = d.dur.map((v,i) => (Number.isFinite(v) && Number.isFinite(d.durb[i])) ? parseFloat((v - d.durb[i]).toFixed(4)) : null);
+  const ytmDiff = d.ytm.map((v,i) => (Number.isFinite(v) && Number.isFinite(d.ytmb[i])) ? parseFloat((v - d.ytmb[i]).toFixed(4)) : null);
+
+  charts.durDiff = new Chart(document.getElementById('durDiffChart'), {
+    type: 'line',
+    data: { labels, datasets: [
+      {label:'Diferencia', data:durDiff, borderColor:'#1F4E79', borderWidth:1.7, tension:0.3, fill:true, backgroundColor:'rgba(31,78,121,0.08)'}
+    ]},
+    options: optsBase(v => v.toFixed(2)+'a')
+  });
+
+  charts.ytmDiff = new Chart(document.getElementById('ytmDiffChart'), {
+    type: 'line',
+    data: { labels, datasets: [
+      {label:'Diferencia', data:ytmDiff, borderColor:'#1F4E79', borderWidth:1.7, tension:0.3, fill:true, backgroundColor:'rgba(31,78,121,0.08)'}
+    ]},
+    options: optsBase(v => v.toFixed(2)+'%')
+  });
+ 
   charts.volOps = new Chart(document.getElementById('volOpsChart'), {
     type: 'line',
     data: { labels, datasets: [
