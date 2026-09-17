@@ -608,6 +608,29 @@ tbody tr:hover td {
             </div>
 
         </div>
+
+        <!-- SPREAD DEL FONDO VS CURVA -->
+
+        <div class="panel">
+
+            <div class="panel-title">
+                Spread ETFPESOV vs curva soberana — histórico
+            </div>
+
+            <div
+                id="spreadHistoryChart"
+                class="main-chart"
+            ></div>
+
+            <div class="chart-note">
+
+                YTM del ETFPESOV menos el YTM de la curva interpolado a la duración del fondo ·
+                Positivo = el fondo rinde más que la curva a su misma duración ·
+                La línea punteada marca la fecha seleccionada.
+
+            </div>
+
+        </div>
         
         <!-- TWO CHARTS -->
 
@@ -1073,6 +1096,56 @@ function formatDuration(value) {
 
 }
 
+/* =========================================================
+   YTM DE LA CURVA INTERPOLADO A UNA DURACIÓN DADA
+========================================================= */
+
+function interpolateCurveYtm(rows, targetDuration, durKey, ytmKey) {
+
+    if (!Number.isFinite(targetDuration)) return null;
+
+    const pts = rows
+        .filter(r =>
+            Number.isFinite(r[durKey]) &&
+            Number.isFinite(r[ytmKey])
+        )
+        .sort((a,b) => a[durKey] - b[durKey]);
+
+    if (pts.length < 2) return null;
+
+    /* Fuera del rango de la curva: no extrapolamos. */
+    if (
+        targetDuration < pts[0][durKey] ||
+        targetDuration > pts[pts.length - 1][durKey]
+    ) {
+        return null;
+    }
+
+    for (let i = 0; i < pts.length - 1; i++) {
+
+        const a = pts[i];
+        const b = pts[i + 1];
+
+        if (
+            targetDuration >= a[durKey] &&
+            targetDuration <= b[durKey]
+        ) {
+
+            if (b[durKey] === a[durKey]) return a[ytmKey];
+
+            const w =
+                (targetDuration - a[durKey]) /
+                (b[durKey] - a[durKey]);
+
+            return a[ytmKey] + w * (b[ytmKey] - a[ytmKey]);
+
+        }
+
+    }
+
+    return null;
+
+}   
 
 /* =========================================================
    ESCAPE HTML
@@ -1756,6 +1829,10 @@ function renderDashboard() {
         data
     );
 
+    renderSpreadHistory(
+    selectedDate
+    );
+
     renderDifference(
         data
     );
@@ -2333,7 +2410,140 @@ function renderDurationCurve(data) {
 
 }
 
+/* =========================================================
+   SPREAD HISTÓRICO — ETFPESOV VS CURVA INTERPOLADA
+========================================================= */
 
+function renderSpreadHistory(selectedDate) {
+
+    /* Agrupa toda la base por fecha (no solo la fecha elegida). */
+
+    const byDate = new Map();
+
+    dataset.forEach(row => {
+        if (!byDate.has(row.Fecha)) byDate.set(row.Fecha, []);
+        byDate.get(row.Fecha).push(row);
+    });
+
+    const dates = [...byDate.keys()].sort();
+
+    const spreadValmer = [];
+    const spreadMef = [];
+
+    dates.forEach(date => {
+
+        const rows = byDate.get(date);
+
+        const fondoRow = rows.find(
+            r => r.DuracionETF !== null && r.YtmETF !== null
+        );
+
+        if (!fondoRow) {
+            spreadValmer.push(null);
+            spreadMef.push(null);
+            return;
+        }
+
+        const curvaValmer = interpolateCurveYtm(
+            rows, fondoRow.DuracionETF, "DurValmer", "YtmValmer"
+        );
+
+        const curvaMef = interpolateCurveYtm(
+            rows, fondoRow.DuracionETF, "DurMef", "YtmMef"
+        );
+
+        spreadValmer.push(
+            curvaValmer !== null
+                ? (fondoRow.YtmETF - curvaValmer) * 100
+                : null
+        );
+
+        spreadMef.push(
+            curvaMef !== null
+                ? (fondoRow.YtmETF - curvaMef) * 100
+                : null
+        );
+
+    });
+
+    const traces = [
+
+        {
+            x: dates,
+            y: spreadValmer,
+            mode: "lines",
+            name: "vs VALMER",
+            line: { width: 2, color: COLORS.primary },
+            connectgaps: false,
+            hovertemplate:
+                "<b>%{x}</b>" +
+                "<br>Spread vs VALMER: %{y:.1f} pb" +
+                "<extra></extra>"
+        },
+
+        {
+            x: dates,
+            y: spreadMef,
+            mode: "lines",
+            name: "vs MEF",
+            line: { width: 1.8, dash: "dash", color: COLORS.bench },
+            connectgaps: false,
+            hovertemplate:
+                "<b>%{x}</b>" +
+                "<br>Spread vs MEF: %{y:.1f} pb" +
+                "<extra></extra>"
+        }
+
+    ];
+
+    Plotly.react(
+
+        "spreadHistoryChart",
+
+        traces,
+
+        {
+
+            ...baseLayout,
+
+            margin: { l: 60, r: 25, t: 10, b: 55 },
+
+            xaxis: {
+                title: "Fecha",
+                type: "date",
+                gridcolor: COLORS.grid,
+                zeroline: false
+            },
+
+            yaxis: {
+                title: "Spread (pb)",
+                ticksuffix: " pb",
+                gridcolor: COLORS.grid,
+                zeroline: true,
+                zerolinecolor: "#b8b7b0",
+                zerolinewidth: 1.5
+            },
+
+            shapes: selectedDate ? [{
+                type: "line",
+                x0: selectedDate,
+                x1: selectedDate,
+                yref: "paper",
+                y0: 0,
+                y1: 1,
+                line: { color: COLORS.amber, width: 1, dash: "dot" }
+            }] : [],
+
+            legend: { orientation: "h", y: 1.08, x: 0 }
+
+        },
+
+        { responsive: true, displaylogo: false }
+
+    );
+
+}
+    
 /* =========================================================
    DIFERENCIA DE PESOS
 ========================================================= */
